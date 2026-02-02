@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
-import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope, FaHeart, FaCode } from 'react-icons/fa';
+import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope, FaCode } from 'react-icons/fa';
 import { HiMail, HiPhone, HiLocationMarker } from 'react-icons/hi';
 
 const Footer = () => {
@@ -117,9 +117,6 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm flex items-center gap-2">
               Copyright © {currentYear} Vikash Maskhare. All rights reserved.
-            </p>
-            <p className="text-gray-400 text-sm flex items-center gap-2">
-              Made with <FaHeart className="text-red-500 animate-pulse" /> using React & Tailwind CSS
             </p>
           </div>
         </div>
