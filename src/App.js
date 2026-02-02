@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import "./App.css";
 import React from "react";
 import { useState } from "react";
@@ -9,7 +8,7 @@ import Profile from "./components/Profile";
 import Contact from "./components/Contact";
 import Blogs from "./components/Blogs";
 import Login from "./components/Login";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
   // check preSelected color theme

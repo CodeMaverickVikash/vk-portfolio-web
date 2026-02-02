@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { downloadDefaultResume } from "../utils/downloadResume";
 import Logo from "./Logo";
 
