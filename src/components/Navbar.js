@@ -67,7 +67,7 @@ const Navbar = (props) => {
               className={getLinkClasses('/blogs')}
             >
               <HiDocumentText className="text-lg" />
-              Blogs
+              Languages
             </Link>
           </nav>
 
@@ -188,7 +188,7 @@ const Navbar = (props) => {
               className={getLinkClasses('/blogs')}
             >
               <HiDocumentText className="text-xl" />
-              Blogs
+              Languages
             </Link>
           </nav>
 
