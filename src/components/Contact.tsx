@@ -1,25 +1,32 @@
-import { useState } from 'react';
-import { HiMail, HiPhone, HiLocationMarker, HiUser, HiPencilAlt, HiPaperAirplane } from 'react-icons/hi';
+import { useState, ChangeEvent, FormEvent } from 'react';
+import { HiMail, HiPhone, HiLocationMarker, HiUser, HiPaperAirplane } from 'react-icons/hi';
 import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
 
+interface FormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
 const Contact = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     subject: '',
     message: ''
   });
 
-  const [formStatus, setFormStatus] = useState('');
+  const [formStatus, setFormStatus] = useState<string>('');
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Here you would typically send the form data to a backend
     setFormStatus('Message sent successfully! I\'ll get back to you soon.');
@@ -55,7 +62,7 @@ const Contact = () => {
                   <h3 className="font-bold text-gray-900 dark:text-white mb-1">Email</h3>
                   <a
                     href="mailto:vikashmaskhare95@gmail.com"
-                    className="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors break-all"
+                    className="text-purple-600 dark:text-purple-400 hover:underline text-sm break-all"
                   >
                     vikashmaskhare95@gmail.com
                   </a>
@@ -65,14 +72,14 @@ const Contact = () => {
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <HiPhone className="text-white text-xl" />
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 dark:text-white mb-1">Phone</h3>
                   <a
                     href="tel:+919752004079"
-                    className="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                    className="text-purple-600 dark:text-purple-400 hover:underline text-sm"
                   >
                     +91 9752004079
                   </a>
@@ -82,12 +89,12 @@ const Contact = () => {
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <HiLocationMarker className="text-white text-xl" />
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 dark:text-white mb-1">Location</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
                     Bhopal, Madhya Pradesh<br />India
                   </p>
                 </div>
@@ -96,7 +103,7 @@ const Contact = () => {
 
             {/* Social Links */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-700">
-              <h3 className="font-bold text-gray-900 dark:text-white mb-4">Connect on Social</h3>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-4">Connect With Me</h3>
               <div className="flex gap-3">
                 <a
                   href="https://github.com/vikashmaskhare"
@@ -132,10 +139,7 @@ const Contact = () => {
           {/* Contact Form */}
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                <HiPencilAlt className="text-purple-600" />
-                Send Me a Message
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Send Me a Message</h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
@@ -200,7 +204,7 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    rows="6"
+                    rows={6}
                     className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all duration-200 resize-none"
                     placeholder="Tell me about your project or inquiry..."
                   ></textarea>
@@ -229,3 +233,4 @@ const Contact = () => {
 };
 
 export default Contact;
+

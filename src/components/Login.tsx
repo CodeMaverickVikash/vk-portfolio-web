@@ -1,27 +1,34 @@
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiLogin, HiUserAdd } from 'react-icons/hi';
 import { FaGithub, FaGoogle } from 'react-icons/fa';
 import Logo from './Logo';
 
+interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 const Login = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Handle login/signup logic here
     console.log('Form submitted:', formData);
@@ -38,66 +45,73 @@ const Login = () => {
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left Side - Branding & Info */}
           <div className="hidden lg:block">
-            <div className="space-y-8">
-              <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-3xl p-12 text-white shadow-2xl">
+              <Link to="/" className="flex items-center gap-3 mb-8">
                 <Logo width="60" height="60" />
                 <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    Vikash Maskhare
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400">Software Engineer Portfolio</p>
+                  <h1 className="text-3xl font-bold">Vikash Maskhare</h1>
+                  <p className="text-purple-100">Software Engineer</p>
                 </div>
               </Link>
-
-              <div className="space-y-6">
-                <h2 className="text-4xl font-bold text-gray-900 dark:text-white">
-                  Welcome to My <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Portfolio</span>
-                </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-                  Join the community to access exclusive content, connect with me, and stay updated with my latest projects and blog posts.
-                </p>
-
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <HiUserAdd className="text-white text-xl" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white">Create Account</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Get access to exclusive features and content</p>
-                    </div>
+              
+              <h2 className="text-4xl font-bold mb-6">
+                Welcome to My Portfolio
+              </h2>
+              <p className="text-lg text-purple-100 mb-8 leading-relaxed">
+                Join me to explore my projects, skills, and professional journey. Connect with me to discuss opportunities and collaborations.
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <HiLogin className="text-white text-xl" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white">Easy Access</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Sign in with email or social accounts</p>
-                    </div>
+                  <div>
+                    <h3 className="font-semibold">3+ Years Experience</h3>
+                    <p className="text-sm text-purple-100">Professional Development</p>
                   </div>
                 </div>
-              </div>
-
-              <div className="pt-8 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  By continuing, you agree to our Terms of Service and Privacy Policy
-                </p>
+                
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Modern Tech Stack</h3>
+                    <p className="text-sm text-purple-100">React, Angular, TypeScript</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Innovative Solutions</h3>
+                    <p className="text-sm text-purple-100">Building Scalable Applications</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Right Side - Login/Signup Form */}
           <div className="w-full">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 md:p-10 border border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-100 dark:border-gray-700">
               {/* Mobile Logo */}
-              <div className="lg:hidden flex justify-center mb-6">
-                <Link to="/" className="flex items-center gap-2">
+              <div className="lg:hidden flex justify-center mb-8">
+                <Link to="/" className="flex items-center gap-3">
                   <Logo width="50" height="50" />
-                  <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    VM
-                  </span>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vikash Maskhare</h1>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Software Engineer</p>
+                  </div>
                 </Link>
               </div>
 
@@ -107,17 +121,23 @@ const Login = () => {
                   {isLogin ? 'Welcome Back!' : 'Create Account'}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {isLogin ? 'Sign in to continue to your account' : 'Sign up to get started'}
+                  {isLogin ? 'Sign in to access your account' : 'Sign up to get started'}
                 </p>
               </div>
 
               {/* Social Login Buttons */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <button className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 py-3 px-4 rounded-lg transition-all duration-200 font-medium">
-                  <FaGoogle className="text-lg text-red-500" />
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white py-3 px-4 rounded-lg transition-all duration-200 font-medium"
+                >
+                  <FaGoogle className="text-lg" />
                   Google
                 </button>
-                <button className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 py-3 px-4 rounded-lg transition-all duration-200 font-medium">
+                <button
+                  type="button"
+                  className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white py-3 px-4 rounded-lg transition-all duration-200 font-medium"
+                >
                   <FaGithub className="text-lg" />
                   GitHub
                 </button>
@@ -129,9 +149,7 @@ const Login = () => {
                   <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                    Or continue with email
-                  </span>
+                  <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with email</span>
                 </div>
               </div>
 
@@ -292,3 +310,4 @@ const Login = () => {
 };
 
 export default Login;
+

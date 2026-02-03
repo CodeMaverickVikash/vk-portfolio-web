@@ -1,19 +1,40 @@
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { HiArrowRight, HiSearch, HiBookOpen, HiCode, HiLightningBolt } from 'react-icons/hi';
 import { FaReact, FaNodeJs, FaCode, FaPython, FaJava, FaPhp } from 'react-icons/fa';
 import { SiTypescript, SiJavascript } from 'react-icons/si';
+import { IconType } from 'react-icons';
+
+interface Category {
+  name: string;
+  icon: IconType;
+  color: string;
+}
+
+interface LanguageReference {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  year: string;
+  paradigm: string;
+  features: string[];
+  useCases: string[];
+  icon: IconType;
+  gradient: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+}
 
 const Blogs = () => {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const categories = [
+  const categories: Category[] = [
     { name: 'All', icon: HiBookOpen, color: 'purple' },
     { name: 'Frontend', icon: FaReact, color: 'blue' },
     { name: 'Backend', icon: FaNodeJs, color: 'green' },
   ];
 
-  const languageReferences = [
+  const languageReferences: LanguageReference[] = [
     {
       id: 1,
       name: 'JavaScript',
@@ -90,7 +111,7 @@ const Blogs = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const getDifficultyColor = (difficulty) => {
+  const getDifficultyColor = (difficulty: 'Beginner' | 'Intermediate' | 'Advanced'): string => {
     switch(difficulty) {
       case 'Beginner': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
       case 'Intermediate': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
@@ -119,7 +140,7 @@ const Blogs = () => {
               type="text"
               placeholder="Search programming languages..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl px-6 py-4 pl-14 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all duration-200 shadow-lg"
             />
             <HiSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />

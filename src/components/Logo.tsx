@@ -1,10 +1,23 @@
-import React from 'react';
+interface LogoProps {
+  className?: string;
+  width?: string;
+  height?: string;
+}
+
+interface LogoWithTextProps {
+  className?: string;
+  logoSize?: string;
+}
+
+interface NavbarLogoProps {
+  className?: string;
+}
 
 /**
  * Logo component for Vikash Maskhare Portfolio
  * Features: VM monogram with modern design
  */
-const Logo = ({ className = "", width = "50", height = "50" }) => {
+const Logo = ({ className = "", width = "50", height = "50" }: LogoProps) => {
   return (
     <svg
       width={width}
@@ -65,7 +78,7 @@ const Logo = ({ className = "", width = "50", height = "50" }) => {
 /**
  * Logo with text component
  */
-export const LogoWithText = ({ className = "", logoSize = "40" }) => {
+export const LogoWithText = ({ className = "", logoSize = "40" }: LogoWithTextProps) => {
   return (
     <div className={`flex items-center ${className}`}>
       <Logo width={logoSize} height={logoSize} />
@@ -84,7 +97,7 @@ export const LogoWithText = ({ className = "", logoSize = "40" }) => {
 /**
  * Compact Logo for Navbar
  */
-export const NavbarLogo = ({ className = "" }) => {
+export const NavbarLogo = ({ className = "" }: NavbarLogoProps) => {
   return (
     <div className={`flex items-center ${className}`}>
       <Logo width="40" height="40" />

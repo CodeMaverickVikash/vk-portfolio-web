@@ -1,5 +1,4 @@
 import "./App.css";
-import React from "react";
 import { useState } from "react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -20,7 +19,7 @@ function App() {
   const [isDarkModeEnabled, setDarkMode] = useState(preSelectedMode);
 
   const toggleColorMode = () => {
-    setDarkMode((prevState) => !isDarkModeEnabled);
+    setDarkMode(!isDarkModeEnabled);
     if (isDarkModeEnabled) {
       localStorage.setItem("color-theme", "light");
       return;
@@ -33,11 +32,11 @@ function App() {
       <Router>
         <Navbar onToggle={toggleColorMode} isDarkModeEnabled={isDarkModeEnabled} />
         <Routes>
-          <Route exact path="/" element={<Home  />}></Route>
-          <Route exact path="/profile" element={<Profile />}></Route>
-          <Route exact path="/contact" element={<Contact />}></Route>
-          <Route exact path="/blogs" element={<Blogs />}></Route>
-          <Route exact path="/login" element={<Login />}></Route>
+          <Route path="/" element={<Home  />}></Route>
+          <Route path="/profile" element={<Profile />}></Route>
+          <Route path="/contact" element={<Contact />}></Route>
+          <Route path="/blogs" element={<Blogs />}></Route>
+          <Route path="/login" element={<Login />}></Route>
         </Routes>
         <Footer />
       </Router>
@@ -46,3 +45,4 @@ function App() {
 }
 
 export default App;
+

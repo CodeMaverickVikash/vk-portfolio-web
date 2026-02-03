@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 import { HiHome, HiUser, HiMail, HiDocumentText, HiMoon, HiSun, HiArrowRight, HiMenu, HiX } from 'react-icons/hi';
 
-const Navbar = (props) => {
+interface NavbarProps {
+  onToggle: () => void;
+  isDarkModeEnabled: boolean;
+}
+
+const Navbar = (props: NavbarProps) => {
   const {onToggle, isDarkModeEnabled} = props;
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Helper function to check if link is active
-  const isActive = (path) => {
+  const isActive = (path: string): boolean => {
     return location.pathname === path;
   };
 
   // Helper function to get link classes
-  const getLinkClasses = (path) => {
+  const getLinkClasses = (path: string): string => {
     const baseClasses = "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium";
     const activeClasses = "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg";
     const inactiveClasses = "text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-800 hover:text-purple-600 dark:hover:text-purple-400";
@@ -213,3 +218,4 @@ const Navbar = (props) => {
 };
 
 export default Navbar;
+

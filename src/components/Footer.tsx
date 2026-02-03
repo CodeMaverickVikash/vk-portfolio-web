@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope, FaCode } from 'react-icons/fa';
@@ -126,3 +125,4 @@ const Footer = () => {
 };
 
 export default Footer;
+
