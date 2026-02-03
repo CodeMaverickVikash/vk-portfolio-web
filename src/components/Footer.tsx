@@ -60,8 +60,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to={ROUTES.LANGUAGES} className="text-gray-400 hover:text-purple-400 transition-colors hover:translate-x-1 inline-block">
-                  Languages
+                <Link to={ROUTES.TECH_STACK} className="text-gray-400 hover:text-purple-400 transition-colors hover:translate-x-1 inline-block">
+                  Tech Stack
                 </Link>
               </li>
             </ul>

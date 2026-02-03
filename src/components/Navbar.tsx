@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NavbarLogo } from './Logo';
-import { HiHome, HiUser, HiMail, HiDocumentText, HiMoon, HiSun, HiArrowRight, HiMenu, HiX } from 'react-icons/hi';
+import { HiHome, HiUser, HiMail, HiMoon, HiSun, HiArrowRight, HiMenu, HiX, HiCode } from 'react-icons/hi';
 import { NavbarProps } from '../types';
 import { ROUTES } from '../constants';
 
@@ -62,11 +62,11 @@ const Navbar = (props: NavbarProps) => {
               Contact
             </Link>
             <Link
-              to={ROUTES.LANGUAGES}
-              className={getLinkClasses(ROUTES.LANGUAGES)}
+              to={ROUTES.TECH_STACK}
+              className={getLinkClasses(ROUTES.TECH_STACK)}
             >
-              <HiDocumentText className="text-lg" />
-              Languages
+              <HiCode className="text-lg" />
+              Tech Stack
             </Link>
           </nav>
 
@@ -179,12 +179,12 @@ const Navbar = (props: NavbarProps) => {
               Contact
             </Link>
             <Link
-              to={ROUTES.LANGUAGES}
+              to={ROUTES.TECH_STACK}
               onClick={handleLinkClick}
-              className={getLinkClasses(ROUTES.LANGUAGES)}
+              className={getLinkClasses(ROUTES.TECH_STACK)}
             >
-              <HiDocumentText className="text-xl" />
-              Languages
+              <HiCode className="text-xl" />
+              Tech Stack
             </Link>
           </nav>
 

@@ -1,8 +1,75 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { downloadDefaultResume } from '../utils/downloadResume';
 import { Logo } from '../components';
+import { ROUTES } from '../constants';
+import { FaReact, FaAngular, FaNodeJs, FaHtml5, FaCss3Alt, FaGitAlt, FaDocker } from 'react-icons/fa';
+import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBootstrap, SiRedux, SiMysql, SiPostgresql, SiPostman, SiNpm, SiWebpack } from 'react-icons/si';
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
 
 const Home = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  // Comprehensive skills data for MEAN/MERN stack
+  const skills = [
+    { name: 'React', icon: FaReact, gradient: 'from-cyan-400 to-blue-500', proficiency: 'Expert', category: 'Frontend' },
+    { name: 'Angular', icon: FaAngular, gradient: 'from-red-500 to-red-700', proficiency: 'Expert', category: 'Frontend' },
+    { name: 'TypeScript', icon: SiTypescript, gradient: 'from-blue-500 to-blue-700', proficiency: 'Advanced', category: 'Language' },
+    { name: 'JavaScript', icon: SiJavascript, gradient: 'from-yellow-400 to-yellow-600', proficiency: 'Expert', category: 'Language' },
+    { name: 'Node.js', icon: FaNodeJs, gradient: 'from-green-500 to-green-700', proficiency: 'Advanced', category: 'Backend' },
+    { name: 'Express.js', icon: SiExpress, gradient: 'from-gray-600 to-gray-800', proficiency: 'Advanced', category: 'Backend' },
+    { name: 'MongoDB', icon: SiMongodb, gradient: 'from-green-500 to-green-700', proficiency: 'Advanced', category: 'Database' },
+    { name: 'MySQL', icon: SiMysql, gradient: 'from-blue-500 to-blue-700', proficiency: 'Intermediate', category: 'Database' },
+    { name: 'PostgreSQL', icon: SiPostgresql, gradient: 'from-blue-600 to-indigo-600', proficiency: 'Intermediate', category: 'Database' },
+    { name: 'Redux', icon: SiRedux, gradient: 'from-purple-600 to-indigo-600', proficiency: 'Advanced', category: 'State Management' },
+    { name: 'Tailwind CSS', icon: SiTailwindcss, gradient: 'from-cyan-400 to-teal-500', proficiency: 'Advanced', category: 'Styling' },
+    { name: 'Bootstrap', icon: SiBootstrap, gradient: 'from-purple-500 to-purple-700', proficiency: 'Advanced', category: 'Styling' },
+    { name: 'HTML5', icon: FaHtml5, gradient: 'from-orange-500 to-red-500', proficiency: 'Expert', category: 'Markup' },
+    { name: 'CSS3', icon: FaCss3Alt, gradient: 'from-blue-400 to-blue-600', proficiency: 'Expert', category: 'Styling' },
+    { name: 'Git', icon: FaGitAlt, gradient: 'from-orange-500 to-red-600', proficiency: 'Advanced', category: 'Tools' },
+    { name: 'Docker', icon: FaDocker, gradient: 'from-blue-400 to-blue-600', proficiency: 'Intermediate', category: 'DevOps' },
+    { name: 'Postman', icon: SiPostman, gradient: 'from-orange-500 to-orange-700', proficiency: 'Advanced', category: 'Tools' },
+    { name: 'NPM', icon: SiNpm, gradient: 'from-red-600 to-red-800', proficiency: 'Advanced', category: 'Tools' },
+    { name: 'Webpack', icon: SiWebpack, gradient: 'from-blue-500 to-indigo-600', proficiency: 'Intermediate', category: 'Tools' },
+  ];
+
+  const skillsPerSlide = 6;
+  const totalSlides = Math.ceil(skills.length / skillsPerSlide);
+
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (!isPaused) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % totalSlides);
+      }, 3000); // Change slide every 3 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [isPaused, totalSlides]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+  };
+
+  const getProficiencyColor = (proficiency: string) => {
+    switch (proficiency) {
+      case 'Expert': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+      case 'Advanced': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'Intermediate': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
+      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
+    }
+  };
+
   return (
     <div className="main-section dark:bg-gray-900 min-h-screen">
       {/* Hero Section - Modern & Interactive */}
@@ -115,77 +182,112 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Skills & Expertise Section */}
-      <section className="py-20 bg-white dark:bg-gray-800">
+      {/* Skills & Expertise Section - Carousel */}
+      <section className="py-20 bg-white dark:bg-gray-800 overflow-hidden">
         <div className="container mx-auto px-5">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Skills & Expertise
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Specialized in modern web technologies and frameworks
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-2">
+              Specialized in MEAN & MERN stack technologies
+            </p>
+            <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">
+              {skills.length} Technologies • Auto-scrolling carousel
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {/* React */}
-            <div className="group p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-gray-600">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-2xl group-hover:scale-110 transition-transform">
-                  ⚛️
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">React.js</h3>
+          {/* Carousel Container */}
+          <div
+            className="relative max-w-7xl mx-auto"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            ref={sliderRef}
+          >
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevSlide}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white dark:bg-gray-700 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border-2 border-purple-200 dark:border-purple-800"
+              aria-label="Previous slide"
+            >
+              <HiChevronLeft className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white dark:bg-gray-700 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border-2 border-purple-200 dark:border-purple-800"
+              aria-label="Next slide"
+            >
+              <HiChevronRight className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </button>
+
+            {/* Skills Grid - Slides */}
+            <div className="overflow-hidden rounded-2xl">
+              <div
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              >
+                {Array.from({ length: totalSlides }).map((_, slideIndex) => (
+                  <div key={slideIndex} className="min-w-full px-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                      {skills
+                        .slice(slideIndex * skillsPerSlide, (slideIndex + 1) * skillsPerSlide)
+                        .map((skill, index) => {
+                          const Icon = skill.icon;
+                          return (
+                            <div
+                              key={index}
+                              className="group p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-gray-600"
+                            >
+                              <div className="text-center">
+                                <div className={`w-16 h-16 mx-auto mb-3 bg-gradient-to-br ${skill.gradient} rounded-lg flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-md`}>
+                                  <Icon className="text-3xl" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">
+                                  {skill.name}
+                                </h3>
+                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${getProficiencyColor(skill.proficiency)}`}>
+                                  {skill.proficiency}
+                                </span>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                  {skill.category}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Angular */}
-            <div className="group p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-gray-600">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-red-400 to-red-600 rounded-lg flex items-center justify-center text-white font-bold text-2xl group-hover:scale-110 transition-transform">
-                  🅰️
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Angular</h3>
-              </div>
+            {/* Slide Indicators */}
+            <div className="flex justify-center gap-2 mt-8">
+              {Array.from({ length: totalSlides }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    currentSlide === index
+                      ? 'w-8 bg-gradient-to-r from-purple-600 to-indigo-600'
+                      : 'w-2 bg-gray-300 dark:bg-gray-600 hover:bg-purple-400 dark:hover:bg-purple-500'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
             </div>
 
-            {/* TypeScript */}
-            <div className="group p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-gray-600">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform">
-                  TS
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">TypeScript</h3>
-              </div>
-            </div>
-
-            {/* Node.js */}
-            <div className="group p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-gray-600">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-green-700 rounded-lg flex items-center justify-center text-white font-bold text-2xl group-hover:scale-110 transition-transform">
-                  📗
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Node.js</h3>
-              </div>
-            </div>
-
-            {/* MongoDB */}
-            <div className="group p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-gray-600">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-600 to-green-800 rounded-lg flex items-center justify-center text-white font-bold text-2xl group-hover:scale-110 transition-transform">
-                  🍃
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">MongoDB</h3>
-              </div>
-            </div>
-
-            {/* Tailwind */}
-            <div className="group p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100 dark:border-gray-600">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-lg flex items-center justify-center text-white font-bold text-2xl group-hover:scale-110 transition-transform">
-                  🎨
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Tailwind</h3>
-              </div>
+            {/* View All Skills Link */}
+            <div className="text-center mt-8">
+              <Link
+                to={ROUTES.TECH_STACK}
+                className="inline-flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold hover:gap-3 transition-all duration-300"
+              >
+                View Complete Tech Stack
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
             </div>
           </div>
         </div>

@@ -5,7 +5,8 @@ export const ROUTES = {
   HOME: '/',
   PROFILE: '/profile',
   CONTACT: '/contact',
-  LANGUAGES: '/blogs',
+  TECH_STACK: '/tech-stack',
+  TECH_DETAIL: '/tech/:techId',
   LOGIN: '/login',
 } as const;
 
