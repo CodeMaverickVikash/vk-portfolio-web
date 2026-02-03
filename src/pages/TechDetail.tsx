@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { HiArrowLeft, HiBookOpen, HiCode, HiLightningBolt, HiExternalLink, HiCheckCircle } from 'react-icons/hi';
+import { useState, useRef } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { HiBookOpen, HiCode, HiLightningBolt, HiExternalLink, HiCheckCircle, HiChevronLeft, HiChevronRight, HiArrowLeft } from 'react-icons/hi';
 import { FaReact, FaAngular, FaNodeJs, FaHtml5, FaCss3Alt, FaGitAlt, FaDocker } from 'react-icons/fa';
 import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBootstrap, SiRedux, SiMysql, SiPostgresql, SiPostman, SiNpm, SiWebpack } from 'react-icons/si';
 import { IconType } from 'react-icons';
@@ -36,8 +36,20 @@ interface TechData {
 
 const TechDetail = () => {
   const { techId } = useParams<{ techId: string }>();
-  const navigate = useNavigate();
   const [selectedTopicId, setSelectedTopicId] = useState<number>(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
 
   // Technology data mapping
   const techDataMap: Record<string, TechData> = {
@@ -334,80 +346,63 @@ const TechDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-      {/* Header Section */}
-      <section className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto px-5 py-8">
-          {/* Back Button */}
-          <button
-            onClick={() => navigate(ROUTES.TECH_STACK)}
-            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 mb-6 transition-colors"
-          >
-            <HiArrowLeft className="text-xl" />
-            Back to Tech Stack
-          </button>
-
-          {/* Technology Header */}
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className={`w-24 h-24 bg-gradient-to-br ${techData.gradient} rounded-2xl flex items-center justify-center shadow-lg`}>
-              <Icon className="text-5xl text-white" />
-            </div>
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3 mb-3">
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
-                  {techData.name}
-                </h1>
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getDifficultyColor(techData.difficulty)}`}>
-                  {techData.difficulty}
-                </span>
-              </div>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
-                {techData.description}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">
-                  {techData.category}
-                </span>
-                <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium">
-                  Since {techData.year}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Main Content */}
-      <div className="container mx-auto px-5 py-8">
-        <div className="max-w-full">
-          {/* Horizontal Topics Navigation - Always at Top */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-6 overflow-x-auto sticky top-0 z-10">
-            <div className="p-4">
-              <div className="flex gap-2 min-w-max">
-                {techData.topics.map((topic) => (
-                  <button
-                    key={topic.id}
-                    onClick={() => setSelectedTopicId(topic.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap ${
-                      selectedTopicId === topic.id
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
-                    }`}
-                  >
-                    {topic.isIntro ? (
-                      <HiBookOpen className="text-lg" />
-                    ) : (
-                      <div className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+      <div className="px-4 md:px-6 lg:px-8 py-8 max-w-[1600px] mx-auto">
+        <div className="w-full">
+          {/* Horizontal Topics Navigation with Slider - Always at Top */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-6 sticky top-4 z-40">
+            <div className="relative">
+              {/* Left Scroll Button */}
+              <button
+                onClick={scrollLeft}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600 transition-all ml-2"
+                aria-label="Scroll left"
+              >
+                <HiChevronLeft className="text-xl text-gray-700 dark:text-gray-300" />
+              </button>
+
+              {/* Topics Container */}
+              <div
+                ref={scrollContainerRef}
+                className="overflow-x-auto scrollbar-hide scroll-smooth p-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                <div className="flex gap-2 min-w-max px-10">
+                  {techData.topics.map((topic) => (
+                    <button
+                      key={topic.id}
+                      onClick={() => setSelectedTopicId(topic.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap ${
                         selectedTopicId === topic.id
-                          ? 'bg-white/20 text-white'
-                          : 'bg-gradient-to-br from-purple-500 to-indigo-500 text-white'
-                      }`}>
-                        {topic.id}
-                      </div>
-                    )}
-                    <span className="font-medium text-sm">{topic.title}</span>
-                  </button>
-                ))}
+                          ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                      }`}
+                    >
+                      {topic.isIntro ? (
+                        <HiBookOpen className="text-lg" />
+                      ) : (
+                        <div className={`w-6 h-6 rounded-md flex items-center justify-center font-bold text-sm flex-shrink-0 ${
+                          selectedTopicId === topic.id
+                            ? 'bg-white/20 text-white'
+                            : 'bg-gradient-to-br from-purple-500 to-indigo-500 text-white'
+                        }`}>
+                          {topic.id}
+                        </div>
+                      )}
+                      <span className="font-medium text-sm">{topic.title}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Right Scroll Button */}
+              <button
+                onClick={scrollRight}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600 transition-all mr-2"
+                aria-label="Scroll right"
+              >
+                <HiChevronRight className="text-xl text-gray-700 dark:text-gray-300" />
+              </button>
             </div>
           </div>
 
@@ -558,54 +553,6 @@ const TechDetail = () => {
                           <HiCheckCircle className="text-purple-600 text-lg flex-shrink-0" />
                           <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{subtopic}</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Grid: Key Features & Resources */}
-                <div className="grid lg:grid-cols-2 gap-6">
-                  {/* Key Features */}
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                      <HiLightningBolt className="text-purple-600" />
-                      Key Features of {techData.name}
-                    </h2>
-                    <div className="space-y-2">
-                      {techData.keyFeatures.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <HiCheckCircle className="text-green-500 flex-shrink-0" />
-                          <span className="text-gray-700 dark:text-gray-300 text-sm">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Learning Resources */}
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                      <HiBookOpen className="text-purple-600" />
-                      Learning Resources
-                    </h2>
-                    <div className="space-y-2">
-                      {techData.resources.map((resource, index) => (
-                        <a
-                          key={index}
-                          href={resource.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md transition-all group"
-                        >
-                          <div className="flex items-start justify-between gap-2 mb-1">
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                              {resource.title}
-                            </h3>
-                            <HiExternalLink className="text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 flex-shrink-0" />
-                          </div>
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getResourceTypeColor(resource.type)}`}>
-                            {resource.type}
-                          </span>
-                        </a>
                       ))}
                     </div>
                   </div>

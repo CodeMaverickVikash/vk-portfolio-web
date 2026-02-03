@@ -126,20 +126,6 @@ const TechStack = () => {
       gradient: 'from-purple-500 to-purple-700',
       difficulty: 'Beginner'
     },
-    {
-      id: 9,
-      name: 'Redux',
-      description: 'Predictable state container for JavaScript apps. Manages application state in React applications with a single source of truth and time-travel debugging.',
-      category: 'Framework',
-      year: '2015',
-      paradigm: 'State Management',
-      features: ['Single Store', 'Immutable State', 'Time-travel Debugging', 'Middleware Support', 'DevTools'],
-      useCases: ['Complex State Management', 'Large React Apps', 'Predictable State Updates', 'Debugging'],
-      icon: SiRedux,
-      gradient: 'from-purple-600 to-indigo-600',
-      difficulty: 'Advanced'
-    },
-
     // Backend Technologies
     {
       id: 10,
@@ -195,20 +181,6 @@ const TechStack = () => {
       gradient: 'from-blue-500 to-blue-700',
       difficulty: 'Intermediate'
     },
-    {
-      id: 14,
-      name: 'PostgreSQL',
-      description: 'Advanced open-source relational database. Known for reliability, feature robustness, and performance. Supports both SQL and JSON querying.',
-      category: 'Database',
-      year: '1996',
-      paradigm: 'Relational',
-      features: ['ACID Compliance', 'JSON Support', 'Advanced Indexing', 'Full-text Search', 'Extensions'],
-      useCases: ['Enterprise Applications', 'Geospatial Data', 'Data Analytics', 'Complex Queries'],
-      icon: SiPostgresql,
-      gradient: 'from-blue-600 to-indigo-600',
-      difficulty: 'Advanced'
-    },
-
     // Development Tools
     {
       id: 15,
@@ -222,19 +194,6 @@ const TechStack = () => {
       icon: SiGit,
       gradient: 'from-orange-500 to-red-600',
       difficulty: 'Intermediate'
-    },
-    {
-      id: 16,
-      name: 'Docker',
-      description: 'Platform for developing, shipping, and running applications in containers. Ensures consistency across development, testing, and production environments.',
-      category: 'Tools',
-      year: '2013',
-      paradigm: 'Containerization',
-      features: ['Containerization', 'Portability', 'Isolation', 'Scalability', 'Microservices'],
-      useCases: ['Application Deployment', 'Microservices', 'CI/CD Pipelines', 'Development Environments'],
-      icon: SiDocker,
-      gradient: 'from-blue-400 to-blue-600',
-      difficulty: 'Advanced'
     },
     {
       id: 17,
