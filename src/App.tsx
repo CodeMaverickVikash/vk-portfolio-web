@@ -1,44 +1,25 @@
-import "./App.css";
-import { useState } from "react";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Home from "./components/Home";
-import Profile from "./components/Profile";
-import Contact from "./components/Contact";
-import Blogs from "./components/Blogs";
-import Login from "./components/Login";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useDarkMode } from './hooks';
+import { MainLayout } from './layouts';
+import { Home, Profile, Contact, Languages, Login } from './pages';
+import { ROUTES } from './constants';
 
 function App() {
-  // check preSelected color theme
-  let preSelectedMode = false;
-  if (localStorage.getItem("color-theme") === "dark") {
-    preSelectedMode = true;
-  }
-
-  const [isDarkModeEnabled, setDarkMode] = useState(preSelectedMode);
-
-  const toggleColorMode = () => {
-    setDarkMode(!isDarkModeEnabled);
-    if (isDarkModeEnabled) {
-      localStorage.setItem("color-theme", "light");
-      return;
-    }
-    localStorage.setItem("color-theme", "dark");
-  };
+  const [isDarkModeEnabled, toggleDarkMode] = useDarkMode();
 
   return (
-    <div className={`home-wrapper ${isDarkModeEnabled ? "dark" : ""}`}>
+    <div className={`home-wrapper ${isDarkModeEnabled ? 'dark' : ''}`}>
       <Router>
-        <Navbar onToggle={toggleColorMode} isDarkModeEnabled={isDarkModeEnabled} />
-        <Routes>
-          <Route path="/" element={<Home  />}></Route>
-          <Route path="/profile" element={<Profile />}></Route>
-          <Route path="/contact" element={<Contact />}></Route>
-          <Route path="/blogs" element={<Blogs />}></Route>
-          <Route path="/login" element={<Login />}></Route>
-        </Routes>
-        <Footer />
+        <MainLayout isDarkModeEnabled={isDarkModeEnabled} onToggleDarkMode={toggleDarkMode}>
+          <Routes>
+            <Route path={ROUTES.HOME} element={<Home />} />
+            <Route path={ROUTES.PROFILE} element={<Profile />} />
+            <Route path={ROUTES.CONTACT} element={<Contact />} />
+            <Route path={ROUTES.LANGUAGES} element={<Languages />} />
+            <Route path={ROUTES.LOGIN} element={<Login />} />
+          </Routes>
+        </MainLayout>
       </Router>
     </div>
   );

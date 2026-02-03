@@ -2,29 +2,9 @@ import { useState, ChangeEvent } from 'react';
 import { HiArrowRight, HiSearch, HiBookOpen, HiCode, HiLightningBolt } from 'react-icons/hi';
 import { FaReact, FaNodeJs, FaCode, FaPython, FaJava, FaPhp } from 'react-icons/fa';
 import { SiTypescript, SiJavascript } from 'react-icons/si';
-import { IconType } from 'react-icons';
+import { Category, LanguageReference } from '../types';
 
-interface Category {
-  name: string;
-  icon: IconType;
-  color: string;
-}
-
-interface LanguageReference {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
-  year: string;
-  paradigm: string;
-  features: string[];
-  useCases: string[];
-  icon: IconType;
-  gradient: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-}
-
-const Blogs = () => {
+const Languages = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -282,4 +262,4 @@ const Blogs = () => {
   );
 };
 
-export default Blogs;
+export default Languages;

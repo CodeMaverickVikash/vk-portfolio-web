@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import Logo from './Logo';
+import { NavbarLogo } from './Logo';
 import { HiHome, HiUser, HiMail, HiDocumentText, HiMoon, HiSun, HiArrowRight, HiMenu, HiX } from 'react-icons/hi';
-
-interface NavbarProps {
-  onToggle: () => void;
-  isDarkModeEnabled: boolean;
-}
+import { NavbarProps } from '../types';
+import { ROUTES } from '../constants';
 
 const Navbar = (props: NavbarProps) => {
   const {onToggle, isDarkModeEnabled} = props;
@@ -37,39 +34,36 @@ const Navbar = (props: NavbarProps) => {
       <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-md dark:shadow-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto flex p-4 md:p-5 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex title-font font-medium items-center text-gray-900 cursor-pointer hover:opacity-80 transition-opacity">
-            <Logo width="45" height="45" />
-            <span className="ml-3 text-xl dark:text-white font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Vikash Maskhare
-            </span>
+          <Link to={ROUTES.HOME} className="flex title-font font-medium items-center text-gray-900 cursor-pointer hover:opacity-80 transition-opacity">
+            <NavbarLogo />
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center text-base gap-1 ml-auto mr-6">
             <Link
-              to="/"
-              className={getLinkClasses('/')}
+              to={ROUTES.HOME}
+              className={getLinkClasses(ROUTES.HOME)}
             >
               <HiHome className="text-lg" />
               Home
             </Link>
             <Link
-              to="/profile"
-              className={getLinkClasses('/profile')}
+              to={ROUTES.PROFILE}
+              className={getLinkClasses(ROUTES.PROFILE)}
             >
               <HiUser className="text-lg" />
               Profile
             </Link>
             <Link
-              to="/contact"
-              className={getLinkClasses('/contact')}
+              to={ROUTES.CONTACT}
+              className={getLinkClasses(ROUTES.CONTACT)}
             >
               <HiMail className="text-lg" />
               Contact
             </Link>
             <Link
-              to="/blogs"
-              className={getLinkClasses('/blogs')}
+              to={ROUTES.LANGUAGES}
+              className={getLinkClasses(ROUTES.LANGUAGES)}
             >
               <HiDocumentText className="text-lg" />
               Languages
@@ -91,7 +85,7 @@ const Navbar = (props: NavbarProps) => {
               )}
             </button>
             <Link
-              to="/login"
+              to={ROUTES.LOGIN}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0 py-2 px-5 focus:outline-none hover:from-purple-700 hover:to-indigo-700 rounded-lg text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
             >
               Sign in
@@ -146,11 +140,8 @@ const Navbar = (props: NavbarProps) => {
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <Link to="/" onClick={handleLinkClick} className="flex items-center gap-3">
-              <Logo width="40" height="40" />
-              <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                Vikash Maskhare
-              </span>
+            <Link to={ROUTES.HOME} onClick={handleLinkClick} className="flex items-center gap-3">
+              <NavbarLogo />
             </Link>
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -164,33 +155,33 @@ const Navbar = (props: NavbarProps) => {
           {/* Sidebar Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             <Link
-              to="/"
+              to={ROUTES.HOME}
               onClick={handleLinkClick}
-              className={getLinkClasses('/')}
+              className={getLinkClasses(ROUTES.HOME)}
             >
               <HiHome className="text-xl" />
               Home
             </Link>
             <Link
-              to="/profile"
+              to={ROUTES.PROFILE}
               onClick={handleLinkClick}
-              className={getLinkClasses('/profile')}
+              className={getLinkClasses(ROUTES.PROFILE)}
             >
               <HiUser className="text-xl" />
               Profile
             </Link>
             <Link
-              to="/contact"
+              to={ROUTES.CONTACT}
               onClick={handleLinkClick}
-              className={getLinkClasses('/contact')}
+              className={getLinkClasses(ROUTES.CONTACT)}
             >
               <HiMail className="text-xl" />
               Contact
             </Link>
             <Link
-              to="/blogs"
+              to={ROUTES.LANGUAGES}
               onClick={handleLinkClick}
-              className={getLinkClasses('/blogs')}
+              className={getLinkClasses(ROUTES.LANGUAGES)}
             >
               <HiDocumentText className="text-xl" />
               Languages
@@ -200,7 +191,7 @@ const Navbar = (props: NavbarProps) => {
           {/* Sidebar Footer */}
           <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
             <Link
-              to="/login"
+              to={ROUTES.LOGIN}
               onClick={handleLinkClick}
               className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0 py-3 px-5 focus:outline-none hover:from-purple-700 hover:to-indigo-700 rounded-lg text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
             >

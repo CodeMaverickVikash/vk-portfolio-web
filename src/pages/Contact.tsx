@@ -1,13 +1,9 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { HiMail, HiPhone, HiLocationMarker, HiUser, HiPaperAirplane } from 'react-icons/hi';
 import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
+import { ContactFormData } from '../types';
 
-interface FormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
+type FormData = ContactFormData;
 
 const Contact = () => {
   const [formData, setFormData] = useState<FormData>({

@@ -1,5 +1,5 @@
-import { downloadDefaultResume } from "../utils/downloadResume";
-import Logo from "./Logo";
+import { downloadDefaultResume } from '../utils/downloadResume';
+import { Logo } from '../components';
 
 const Profile = () => {
   return (

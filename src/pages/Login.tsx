@@ -2,12 +2,10 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiLogin, HiUserAdd } from 'react-icons/hi';
 import { FaGithub, FaGoogle } from 'react-icons/fa';
-import Logo from './Logo';
+import { Logo } from '../components';
+import { LoginFormData } from '../types';
 
-interface FormData {
-  name: string;
-  email: string;
-  password: string;
+type FormData = LoginFormData & {
   confirmPassword: string;
 }
 
