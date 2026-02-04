@@ -26,6 +26,7 @@ app.use(morgan('dev')); // Logging
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/tech-stack', require('./routes/techStack'));
 
 // 404 handler
 app.use((req, res) => {
@@ -56,10 +57,19 @@ app.listen(PORT, () => {
   console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
   console.log('='.repeat(60));
   console.log('📚 Available Endpoints:');
+  console.log('   Auth:');
   console.log(`   🔑 Login:         POST   http://localhost:${PORT}/api/auth/login`);
   console.log(`   🔄 Refresh Token: POST   http://localhost:${PORT}/api/auth/refresh`);
   console.log(`   👤 Get User:      GET    http://localhost:${PORT}/api/auth/me (Protected)`);
   console.log(`   🚪 Logout:        POST   http://localhost:${PORT}/api/auth/logout (Protected)`);
+  console.log('');
+  console.log('   Tech Stack:');
+  console.log(`   📋 Get All:       GET    http://localhost:${PORT}/api/tech-stack`);
+  console.log(`   📊 Get Stats:     GET    http://localhost:${PORT}/api/tech-stack/stats`);
+  console.log(`   🔍 Get One:       GET    http://localhost:${PORT}/api/tech-stack/:id`);
+  console.log(`   ➕ Create:        POST   http://localhost:${PORT}/api/tech-stack (Protected)`);
+  console.log(`   ✏️  Update:        PUT    http://localhost:${PORT}/api/tech-stack/:id (Protected)`);
+  console.log(`   🗑️  Delete:        DELETE http://localhost:${PORT}/api/tech-stack/:id (Protected)`);
   console.log('='.repeat(60));
   console.log('💡 Tip: Use the test-api.http file to test endpoints');
   console.log('='.repeat(60) + '\n');

@@ -1,43 +1,158 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '../layouts/AdminLayout';
 import { HiPlus, HiPencil, HiTrash, HiSearch, HiViewGrid } from 'react-icons/hi';
 import { FaReact, FaNodeJs, FaAngular, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBootstrap, SiRedux, SiMysql, SiPostgresql, SiGit, SiDocker, SiPostman } from 'react-icons/si';
+import { api } from '../../config/api';
+import TechStackModal, { TechFormData } from '../components/TechStackModal';
 
 interface TechItem {
-  id: number;
+  id: string;
   name: string;
+  description: string;
   category: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   year: string;
-  icon: any;
+  paradigm: string;
+  features: string[];
+  useCases: string[];
+  icon: string;
   gradient: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
+// Icon mapping
+const iconMap: Record<string, any> = {
+  SiJavascript,
+  SiTypescript,
+  FaReact,
+  FaAngular,
+  FaHtml5,
+  FaCss3Alt,
+  SiTailwindcss,
+  SiBootstrap,
+  SiRedux,
+  FaNodeJs,
+  SiExpress,
+  SiMongodb,
+  SiMysql,
+  SiPostgresql,
+  SiGit,
+  SiDocker,
+  SiPostman,
+};
 
 const AdminTechStack = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [techStack, setTechStack] = useState<TechItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [selectedTech, setSelectedTech] = useState<TechFormData | null>(null);
+  const [stats, setStats] = useState({ total: 0, frontend: 0, backend: 0, database: 0, framework: 0, tools: 0 });
 
-  // Mock data - in real app this would come from API
-  const techStack: TechItem[] = [
-    { id: 1, name: 'JavaScript', category: 'Frontend', difficulty: 'Intermediate', year: '1995', icon: SiJavascript, gradient: 'from-yellow-400 to-yellow-600' },
-    { id: 2, name: 'TypeScript', category: 'Frontend', difficulty: 'Advanced', year: '2012', icon: SiTypescript, gradient: 'from-blue-500 to-blue-700' },
-    { id: 3, name: 'React', category: 'Framework', difficulty: 'Intermediate', year: '2013', icon: FaReact, gradient: 'from-cyan-400 to-blue-500' },
-    { id: 4, name: 'Angular', category: 'Framework', difficulty: 'Advanced', year: '2016', icon: FaAngular, gradient: 'from-red-500 to-red-700' },
-    { id: 5, name: 'HTML5', category: 'Frontend', difficulty: 'Beginner', year: '2014', icon: FaHtml5, gradient: 'from-orange-500 to-red-500' },
-    { id: 6, name: 'CSS3', category: 'Frontend', difficulty: 'Beginner', year: '2011', icon: FaCss3Alt, gradient: 'from-blue-400 to-blue-600' },
-    { id: 7, name: 'Node.js', category: 'Backend', difficulty: 'Intermediate', year: '2009', icon: FaNodeJs, gradient: 'from-green-500 to-green-700' },
-    { id: 8, name: 'Express.js', category: 'Backend', difficulty: 'Intermediate', year: '2010', icon: SiExpress, gradient: 'from-gray-600 to-gray-800' },
-    { id: 9, name: 'MongoDB', category: 'Database', difficulty: 'Intermediate', year: '2009', icon: SiMongodb, gradient: 'from-green-500 to-green-700' },
-    { id: 10, name: 'MySQL', category: 'Database', difficulty: 'Intermediate', year: '1995', icon: SiMysql, gradient: 'from-blue-500 to-blue-700' },
-    { id: 11, name: 'PostgreSQL', category: 'Database', difficulty: 'Advanced', year: '1996', icon: SiPostgresql, gradient: 'from-blue-600 to-indigo-600' },
-    { id: 12, name: 'Tailwind CSS', category: 'Framework', difficulty: 'Beginner', year: '2017', icon: SiTailwindcss, gradient: 'from-cyan-400 to-blue-500' },
-    { id: 13, name: 'Bootstrap', category: 'Framework', difficulty: 'Beginner', year: '2011', icon: SiBootstrap, gradient: 'from-purple-500 to-purple-700' },
-    { id: 14, name: 'Redux', category: 'Framework', difficulty: 'Advanced', year: '2015', icon: SiRedux, gradient: 'from-purple-600 to-purple-800' },
-    { id: 15, name: 'Git', category: 'Tools', difficulty: 'Intermediate', year: '2005', icon: SiGit, gradient: 'from-orange-500 to-red-600' },
-    { id: 16, name: 'Docker', category: 'Tools', difficulty: 'Advanced', year: '2013', icon: SiDocker, gradient: 'from-blue-500 to-cyan-500' },
-    { id: 17, name: 'Postman', category: 'Tools', difficulty: 'Beginner', year: '2012', icon: SiPostman, gradient: 'from-orange-500 to-orange-600' },
-  ];
+  // Fetch tech stack data
+  useEffect(() => {
+    fetchTechStack();
+    fetchStats();
+  }, []);
+
+  const fetchTechStack = async () => {
+    try {
+      setLoading(true);
+      const response = await api.techStack.getAll();
+      if (response.success) {
+        setTechStack(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching tech stack:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.techStack.getStats();
+      if (response.success) {
+        const { total, byCategory } = response.data;
+        setStats({
+          total,
+          frontend: byCategory.Frontend || 0,
+          backend: byCategory.Backend || 0,
+          database: byCategory.Database || 0,
+          framework: byCategory.Framework || 0,
+          tools: byCategory.Tools || 0,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this technology?')) {
+      return;
+    }
+
+    try {
+      const response = await api.techStack.delete(id);
+      if (response.success) {
+        await fetchTechStack();
+        await fetchStats();
+        alert('Technology deleted successfully!');
+      } else {
+        alert(response.message || 'Failed to delete technology');
+      }
+    } catch (error) {
+      console.error('Error deleting tech:', error);
+      alert('Error deleting technology');
+    }
+  };
+
+  const handleAdd = () => {
+    setModalMode('add');
+    setSelectedTech(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (tech: TechItem) => {
+    setModalMode('edit');
+    setSelectedTech(tech as TechFormData);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async (data: TechFormData) => {
+    try {
+      if (modalMode === 'add') {
+        const response = await api.techStack.create(data);
+        if (response.success) {
+          await fetchTechStack();
+          await fetchStats();
+          setIsModalOpen(false);
+          alert('Technology added successfully!');
+        } else {
+          alert(response.message || 'Failed to add technology');
+        }
+      } else {
+        const response = await api.techStack.update(data.id!, data);
+        if (response.success) {
+          await fetchTechStack();
+          await fetchStats();
+          setIsModalOpen(false);
+          alert('Technology updated successfully!');
+        } else {
+          alert(response.message || 'Failed to update technology');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving tech:', error);
+      alert('Error saving technology');
+    }
+  };
 
   const categories = ['All', 'Frontend', 'Backend', 'Database', 'Framework', 'Tools'];
 
@@ -69,7 +184,10 @@ const AdminTechStack = () => {
               Manage your technologies, frameworks, and tools
             </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all">
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all"
+          >
             <HiPlus className="w-5 h-5" />
             Add Technology
           </button>
@@ -81,7 +199,7 @@ const AdminTechStack = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Technologies</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{techStack.length}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
               </div>
               <HiViewGrid className="w-8 h-8 text-purple-600" />
             </div>
@@ -90,9 +208,7 @@ const AdminTechStack = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Frontend</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {techStack.filter(t => t.category === 'Frontend').length}
-                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.frontend}</p>
               </div>
               <FaReact className="w-8 h-8 text-cyan-600" />
             </div>
@@ -101,8 +217,7 @@ const AdminTechStack = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Backend</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {techStack.filter(t => t.category === 'Backend').length}
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.backend}
                 </p>
               </div>
               <FaNodeJs className="w-8 h-8 text-green-600" />
@@ -112,9 +227,7 @@ const AdminTechStack = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Database</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {techStack.filter(t => t.category === 'Database').length}
-                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.database}</p>
               </div>
               <SiMongodb className="w-8 h-8 text-green-600" />
             </div>
@@ -179,9 +292,18 @@ const AdminTechStack = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredTech.length > 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-gray-600 dark:text-gray-400">Loading technologies...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredTech.length > 0 ? (
                   filteredTech.map((tech) => {
-                    const Icon = tech.icon;
+                    const Icon = iconMap[tech.icon] || HiViewGrid;
                     return (
                       <tr key={tech.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="px-6 py-4">
@@ -211,10 +333,18 @@ const AdminTechStack = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <button className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                            <button
+                              onClick={() => handleEdit(tech)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                              title="Edit"
+                            >
                               <HiPencil className="w-5 h-5" />
                             </button>
-                            <button className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                            <button
+                              onClick={() => handleDelete(tech.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              title="Delete"
+                            >
                               <HiTrash className="w-5 h-5" />
                             </button>
                           </div>
@@ -248,6 +378,15 @@ const AdminTechStack = () => {
           </div>
         )}
       </div>
+
+      {/* Add/Edit Modal */}
+      <TechStackModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        initialData={selectedTech}
+        mode={modalMode}
+      />
     </AdminLayout>
   );
 };

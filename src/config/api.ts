@@ -9,6 +9,11 @@ export const API_ENDPOINTS = {
     ME: `${API_BASE_URL}/auth/me`,
     LOGOUT: `${API_BASE_URL}/auth/logout`,
   },
+  TECH_STACK: {
+    BASE: `${API_BASE_URL}/tech-stack`,
+    STATS: `${API_BASE_URL}/tech-stack/stats`,
+    BY_ID: (id: string) => `${API_BASE_URL}/tech-stack/${id}`,
+  },
 } as const;
 
 // Token management
@@ -176,6 +181,59 @@ export const api = {
       body: JSON.stringify({ refreshToken }),
     });
     return response.json();
+  },
+
+  // Tech Stack CRUD operations
+  techStack: {
+    // Get all tech stack items
+    getAll: async (params?: { category?: string; search?: string; isActive?: boolean }) => {
+      const queryParams = new URLSearchParams();
+      if (params?.category) queryParams.append('category', params.category);
+      if (params?.search) queryParams.append('search', params.search);
+      if (params?.isActive !== undefined) queryParams.append('isActive', String(params.isActive));
+
+      const url = `${API_ENDPOINTS.TECH_STACK.BASE}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response = await fetch(url, { method: 'GET' });
+      return response.json();
+    },
+
+    // Get tech stack statistics
+    getStats: async () => {
+      const response = await fetch(API_ENDPOINTS.TECH_STACK.STATS, { method: 'GET' });
+      return response.json();
+    },
+
+    // Get single tech stack item by ID
+    getById: async (id: string) => {
+      const response = await fetch(API_ENDPOINTS.TECH_STACK.BY_ID(id), { method: 'GET' });
+      return response.json();
+    },
+
+    // Create new tech stack item (Protected)
+    create: async (data: any) => {
+      const response = await fetchWithAuth(API_ENDPOINTS.TECH_STACK.BASE, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    // Update tech stack item (Protected)
+    update: async (id: string, data: any) => {
+      const response = await fetchWithAuth(API_ENDPOINTS.TECH_STACK.BY_ID(id), {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+
+    // Delete tech stack item (Protected)
+    delete: async (id: string) => {
+      const response = await fetchWithAuth(API_ENDPOINTS.TECH_STACK.BY_ID(id), {
+        method: 'DELETE',
+      });
+      return response.json();
+    },
   },
 };
 

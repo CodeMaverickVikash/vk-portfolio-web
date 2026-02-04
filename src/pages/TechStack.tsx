@@ -1,15 +1,54 @@
-import { useState, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiArrowRight, HiSearch, HiBookOpen, HiCode, HiLightningBolt, HiDatabase, HiTemplate } from 'react-icons/hi';
 import { FaReact, FaNodeJs, FaCode, FaAngular, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBootstrap, SiRedux, SiMysql, SiPostgresql, SiGit, SiDocker, SiPostman } from 'react-icons/si';
-import { Category, LanguageReference } from '../types';
+import { Category } from '../types';
 import { ROUTES } from '../constants';
+import { api } from '../config/api';
+
+interface TechItem {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  year: string;
+  paradigm: string;
+  features: string[];
+  useCases: string[];
+  icon: string;
+  gradient: string;
+  isActive: boolean;
+}
+
+// Icon mapping
+const iconMap: Record<string, any> = {
+  SiJavascript,
+  SiTypescript,
+  FaReact,
+  FaAngular,
+  FaHtml5,
+  FaCss3Alt,
+  SiTailwindcss,
+  SiBootstrap,
+  SiRedux,
+  FaNodeJs,
+  SiExpress,
+  SiMongodb,
+  SiMysql,
+  SiPostgresql,
+  SiGit,
+  SiDocker,
+  SiPostman,
+};
 
 const TechStack = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [techStack, setTechStack] = useState<TechItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const categories: Category[] = [
     { name: 'All', icon: HiBookOpen, color: 'purple' },
@@ -20,199 +59,28 @@ const TechStack = () => {
     { name: 'Tools', icon: HiCode, color: 'pink' },
   ];
 
-  const languageReferences: LanguageReference[] = [
-    // Frontend Technologies
-    {
-      id: 1,
-      name: 'JavaScript',
-      description: 'Core language of the web. Essential for building interactive and dynamic web applications. Powers both frontend and backend development in the MEAN/MERN stack.',
-      category: 'Frontend',
-      year: '1995',
-      paradigm: 'Multi-paradigm',
-      features: ['ES6+ Syntax', 'Async/Await', 'Closures', 'Event Loop', 'DOM Manipulation'],
-      useCases: ['Web Development', 'Single Page Applications', 'Real-time Apps', 'API Integration'],
-      icon: SiJavascript,
-      gradient: 'from-yellow-400 to-yellow-600',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 2,
-      name: 'TypeScript',
-      description: 'Superset of JavaScript with static typing. Enhances code quality and developer experience in large-scale applications. Widely used in Angular and modern React projects.',
-      category: 'Frontend',
-      year: '2012',
-      paradigm: 'Multi-paradigm',
-      features: ['Static Typing', 'Interfaces', 'Generics', 'Type Inference', 'Enhanced IDE Support'],
-      useCases: ['Enterprise Applications', 'Angular Projects', 'React with TypeScript', 'Type-safe APIs'],
-      icon: SiTypescript,
-      gradient: 'from-blue-500 to-blue-700',
-      difficulty: 'Advanced'
-    },
-    {
-      id: 3,
-      name: 'React',
-      description: 'Popular JavaScript library for building user interfaces. Component-based architecture makes it perfect for building scalable SPAs. Core of the MERN stack.',
-      category: 'Framework',
-      year: '2013',
-      paradigm: 'Component-based',
-      features: ['Virtual DOM', 'JSX', 'Hooks', 'Component Reusability', 'Unidirectional Data Flow'],
-      useCases: ['Single Page Apps', 'Progressive Web Apps', 'Mobile Apps (React Native)', 'Dashboard UIs'],
-      icon: FaReact,
-      gradient: 'from-cyan-400 to-blue-500',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 4,
-      name: 'Angular',
-      description: 'Comprehensive TypeScript-based framework by Google. Full-featured framework for building enterprise-grade applications. Core of the MEAN stack.',
-      category: 'Framework',
-      year: '2016',
-      paradigm: 'MVC/MVVM',
-      features: ['Two-way Data Binding', 'Dependency Injection', 'RxJS', 'TypeScript Native', 'CLI Tools'],
-      useCases: ['Enterprise Applications', 'Large-scale SPAs', 'Admin Dashboards', 'Progressive Web Apps'],
-      icon: FaAngular,
-      gradient: 'from-red-500 to-red-700',
-      difficulty: 'Advanced'
-    },
-    {
-      id: 5,
-      name: 'HTML5',
-      description: 'Latest evolution of HTML. Foundation of web development providing semantic markup and modern APIs for building accessible and SEO-friendly applications.',
-      category: 'Frontend',
-      year: '2014',
-      paradigm: 'Markup Language',
-      features: ['Semantic Elements', 'Canvas API', 'Local Storage', 'Geolocation', 'Multimedia Support'],
-      useCases: ['Web Structure', 'SEO Optimization', 'Accessibility', 'Progressive Web Apps'],
-      icon: FaHtml5,
-      gradient: 'from-orange-500 to-red-500',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 6,
-      name: 'CSS3',
-      description: 'Modern styling language for web applications. Creates responsive, beautiful, and animated user interfaces with advanced layout systems like Flexbox and Grid.',
-      category: 'Frontend',
-      year: '2011',
-      paradigm: 'Style Sheet Language',
-      features: ['Flexbox', 'Grid Layout', 'Animations', 'Media Queries', 'Custom Properties'],
-      useCases: ['Responsive Design', 'UI Styling', 'Animations', 'Layout Design'],
-      icon: FaCss3Alt,
-      gradient: 'from-blue-400 to-blue-600',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 7,
-      name: 'Tailwind CSS',
-      description: 'Utility-first CSS framework for rapid UI development. Provides low-level utility classes for building custom designs without leaving your HTML.',
-      category: 'Framework',
-      year: '2017',
-      paradigm: 'Utility-first CSS',
-      features: ['Utility Classes', 'Responsive Design', 'Dark Mode', 'Customizable', 'JIT Compiler'],
-      useCases: ['Rapid Prototyping', 'Custom Designs', 'Component Libraries', 'Modern Web Apps'],
-      icon: SiTailwindcss,
-      gradient: 'from-cyan-400 to-teal-500',
-      difficulty: 'Beginner'
-    },
-    {
-      id: 8,
-      name: 'Bootstrap',
-      description: 'Popular CSS framework for responsive web development. Provides pre-built components and grid system for quick and consistent UI development.',
-      category: 'Framework',
-      year: '2011',
-      paradigm: 'Component-based CSS',
-      features: ['Grid System', 'Pre-built Components', 'Responsive Utilities', 'JavaScript Plugins', 'Customizable'],
-      useCases: ['Rapid Development', 'Responsive Websites', 'Admin Templates', 'Landing Pages'],
-      icon: SiBootstrap,
-      gradient: 'from-purple-500 to-purple-700',
-      difficulty: 'Beginner'
-    },
-    // Backend Technologies
-    {
-      id: 10,
-      name: 'Node.js',
-      description: 'JavaScript runtime built on Chrome\'s V8 engine. Enables server-side JavaScript development. Core backend technology in both MEAN and MERN stacks.',
-      category: 'Backend',
-      year: '2009',
-      paradigm: 'Event-driven',
-      features: ['Non-blocking I/O', 'NPM Ecosystem', 'Event Loop', 'Scalable', 'Cross-platform'],
-      useCases: ['REST APIs', 'Real-time Applications', 'Microservices', 'Server-side Rendering'],
-      icon: FaNodeJs,
-      gradient: 'from-green-500 to-green-700',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 11,
-      name: 'Express.js',
-      description: 'Fast, minimalist web framework for Node.js. Simplifies building robust APIs and web applications. Essential part of MEAN and MERN backend development.',
-      category: 'Backend',
-      year: '2010',
-      paradigm: 'Middleware-based',
-      features: ['Routing', 'Middleware', 'Template Engines', 'Error Handling', 'RESTful APIs'],
-      useCases: ['REST APIs', 'Web Applications', 'Microservices', 'API Gateways'],
-      icon: SiExpress,
-      gradient: 'from-gray-600 to-gray-800',
-      difficulty: 'Intermediate'
-    },
+  // Fetch tech stack from API
+  useEffect(() => {
+    const fetchTechStack = async () => {
+      try {
+        setLoading(true);
+        const response = await api.techStack.getAll({ isActive: true });
+        if (response.success) {
+          setTechStack(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching tech stack:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Database Technologies
-    {
-      id: 12,
-      name: 'MongoDB',
-      description: 'NoSQL document database with flexible schema. Stores data in JSON-like documents. The "M" in MEAN and MERN stacks, perfect for modern web applications.',
-      category: 'Database',
-      year: '2009',
-      paradigm: 'Document-oriented',
-      features: ['Flexible Schema', 'JSON Documents', 'Scalability', 'Aggregation Framework', 'Indexing'],
-      useCases: ['Web Applications', 'Real-time Analytics', 'Content Management', 'IoT Applications'],
-      icon: SiMongodb,
-      gradient: 'from-green-500 to-green-700',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 13,
-      name: 'MySQL',
-      description: 'Popular open-source relational database. ACID-compliant with strong data integrity. Widely used for structured data and complex queries.',
-      category: 'Database',
-      year: '1995',
-      paradigm: 'Relational',
-      features: ['ACID Compliance', 'SQL Queries', 'Transactions', 'Stored Procedures', 'Replication'],
-      useCases: ['E-commerce', 'Data Warehousing', 'Web Applications', 'Financial Systems'],
-      icon: SiMysql,
-      gradient: 'from-blue-500 to-blue-700',
-      difficulty: 'Intermediate'
-    },
-    // Development Tools
-    {
-      id: 15,
-      name: 'Git',
-      description: 'Distributed version control system. Essential for collaborative development, code versioning, and maintaining project history across teams.',
-      category: 'Tools',
-      year: '2005',
-      paradigm: 'Version Control',
-      features: ['Branching', 'Merging', 'Distributed', 'Fast Performance', 'Open Source'],
-      useCases: ['Version Control', 'Team Collaboration', 'Code Review', 'CI/CD Integration'],
-      icon: SiGit,
-      gradient: 'from-orange-500 to-red-600',
-      difficulty: 'Intermediate'
-    },
-    {
-      id: 17,
-      name: 'Postman',
-      description: 'API development and testing platform. Simplifies API testing, documentation, and collaboration. Essential tool for backend development.',
-      category: 'Tools',
-      year: '2012',
-      paradigm: 'API Testing',
-      features: ['API Testing', 'Collections', 'Automation', 'Mock Servers', 'Documentation'],
-      useCases: ['API Testing', 'API Documentation', 'Team Collaboration', 'Automated Testing'],
-      icon: SiPostman,
-      gradient: 'from-orange-500 to-orange-700',
-      difficulty: 'Beginner'
-    }
-  ];
+    fetchTechStack();
+  }, []);
 
-  const filteredLanguages = languageReferences.filter(lang => {
-    const matchesCategory = selectedCategory === 'All' || lang.category === selectedCategory;
-    const matchesSearch = lang.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredLanguages = techStack.filter(tech => {
+    const matchesCategory = selectedCategory === 'All' || tech.category === selectedCategory;
+    const matchesSearch = tech.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -285,13 +153,23 @@ const TechStack = () => {
           })}
         </div>
 
-        {/* Language Cards Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {filteredLanguages.length > 0 ? (
-            filteredLanguages.map((lang) => {
-              const Icon = lang.icon;
-              const techId = lang.name.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '');
-              return (
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">Loading technologies...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Language Cards Grid */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              {filteredLanguages.length > 0 ? (
+                filteredLanguages.map((lang) => {
+                  const Icon = iconMap[lang.icon] || FaCode;
+                  const techId = lang.name.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '');
+                  return (
                 <article
                   key={lang.id}
                   onClick={() => navigate(ROUTES.TECH_DETAIL.replace(':techId', techId))}
@@ -389,17 +267,19 @@ const TechStack = () => {
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No technologies found</h3>
               <p className="text-gray-600 dark:text-gray-400">Try adjusting your search or filter criteria</p>
             </div>
-          )}
-        </div>
+              )}
+            </div>
 
-        {/* Results Count */}
-        {filteredLanguages.length > 0 && (
-          <div className="text-center mt-12">
-            <p className="text-gray-600 dark:text-gray-400">
-              Showing <span className="font-bold text-purple-600 dark:text-purple-400">{filteredLanguages.length}</span> of{' '}
-              <span className="font-bold">{languageReferences.length}</span> technologies
-            </p>
-          </div>
+            {/* Results Count */}
+            {filteredLanguages.length > 0 && (
+              <div className="text-center mt-12">
+                <p className="text-gray-600 dark:text-gray-400">
+                  Showing <span className="font-bold text-purple-600 dark:text-purple-400">{filteredLanguages.length}</span> of{' '}
+                  <span className="font-bold">{techStack.length}</span> technologies
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Tech Stack Summary */}
