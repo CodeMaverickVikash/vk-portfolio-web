@@ -2,10 +2,12 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useDarkMode } from './hooks';
 import { MainLayout } from './layouts';
-import { Home, Profile, Contact, TechStack, Login, TechDetail, Dashboard } from './pages';
+import { Home, Profile, Contact, TechStack, Login, TechDetail } from './pages';
 import { ProtectedRoute } from './components';
 import { ROUTES } from './constants';
 import { AuthProvider } from './context/AuthContext';
+// Backend Admin UI
+import { AdminDashboard, AdminTechStack, AdminProfile } from './admin';
 
 function App() {
   const [isDarkModeEnabled, toggleDarkMode] = useDarkMode();
@@ -45,10 +47,20 @@ function App() {
             {/* Login Route (No Layout) */}
             <Route path={ROUTES.LOGIN} element={<Login />} />
 
-            {/* Protected Dashboard Route (Has its own DashboardLayout) */}
-            <Route path={ROUTES.DASHBOARD} element={
+            {/* Protected Admin Routes (Backend UI - Has its own AdminLayout) */}
+            <Route path={ROUTES.ADMIN_DASHBOARD} element={
               <ProtectedRoute>
-                <Dashboard />
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path={ROUTES.ADMIN_TECH_STACK} element={
+              <ProtectedRoute>
+                <AdminTechStack />
+              </ProtectedRoute>
+            } />
+            <Route path={ROUTES.ADMIN_PROFILE} element={
+              <ProtectedRoute>
+                <AdminProfile />
               </ProtectedRoute>
             } />
           </Routes>

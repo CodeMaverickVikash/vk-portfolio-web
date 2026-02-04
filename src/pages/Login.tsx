@@ -31,7 +31,7 @@ const Login = () => {
     const result = await login(email, password);
 
     if (result.success) {
-      navigate(ROUTES.DASHBOARD);
+      navigate(ROUTES.ADMIN_DASHBOARD);
     } else {
       setError(result.message || 'Login failed');
     }

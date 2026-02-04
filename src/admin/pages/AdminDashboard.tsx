@@ -1,8 +1,8 @@
-import { useAuth } from '../context/AuthContext';
-import { HiViewGrid, HiUser, HiEye, HiCode } from 'react-icons/hi';
-import DashboardLayout from '../layouts/DashboardLayout';
+import { useAuth } from '../../context/AuthContext';
+import { HiViewGrid, HiUser, HiEye, HiCode, HiShieldCheck } from 'react-icons/hi';
+import AdminLayout from '../layouts/AdminLayout';
 
-const Dashboard = () => {
+const AdminDashboard = () => {
   const { user } = useAuth();
 
   const stats = [
@@ -48,15 +48,15 @@ const Dashboard = () => {
   ];
 
   return (
-    <DashboardLayout>
+    <AdminLayout>
       <div className="max-w-7xl mx-auto">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome back, {user?.name || 'Admin'}! 👋
+            Admin Overview 👋
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Here's what's happening with your portfolio today.
+            Manage your portfolio content and settings from here.
           </p>
         </div>
 
@@ -143,9 +143,9 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 };
 
-export default Dashboard;
+export default AdminDashboard;
 
