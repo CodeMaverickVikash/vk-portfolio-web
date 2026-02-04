@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { verifyAccessToken } = require('../utils/tokenUtils');
 
-// Protect routes - verify JWT token
+// Protect routes - verify Access Token
 exports.protect = async (req, res, next) => {
   let token;
 
@@ -14,36 +14,49 @@ exports.protect = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: 'Not authorized to access this route. Please login.'
+      message: 'Not authorized to access this route. Please login.',
+      code: 'NO_TOKEN'
     });
   }
 
   try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify access token
+    const decoded = verifyAccessToken(token);
 
     // Get user from token
-    req.user = await User.findById(decoded.id).select('-password');
+    req.user = await User.findById(decoded.id).select('-password -refreshToken');
 
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
+        code: 'USER_NOT_FOUND'
       });
     }
 
     if (!req.user.isActive) {
       return res.status(401).json({
         success: false,
-        message: 'User account is deactivated'
+        message: 'User account is deactivated',
+        code: 'ACCOUNT_DEACTIVATED'
       });
     }
 
     next();
   } catch (error) {
+    // Check if token is expired
+    if (error.message.includes('expired')) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access token expired. Please refresh your token.',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
+
     return res.status(401).json({
       success: false,
-      message: 'Not authorized to access this route. Invalid token.'
+      message: 'Not authorized to access this route. Invalid token.',
+      code: 'INVALID_TOKEN'
     });
   }
 };

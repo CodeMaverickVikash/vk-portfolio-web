@@ -1,40 +1,42 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiLogin, HiUserAdd } from 'react-icons/hi';
-import { FaGithub, FaGoogle } from 'react-icons/fa';
+import { useState, FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiLogin } from 'react-icons/hi';
 import { Logo } from '../components';
-import { LoginFormData } from '../types';
-
-type FormData = LoginFormData & {
-  confirmPassword: string;
-}
+import { useAuth } from '../context/AuthContext';
+import { ROUTES } from '../constants/routes';
 
 const Login = () => {
-  const [isLogin, setIsLogin] = useState<boolean>(true);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Handle login/signup logic here
-    console.log('Form submitted:', formData);
-  };
+    setError('');
+    setIsLoading(true);
 
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+    // Validation
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      setIsLoading(false);
+      return;
+    }
+
+    // Login
+    const result = await login(email, password);
+
+    if (result.success) {
+      navigate(ROUTES.DASHBOARD);
+    } else {
+      setError(result.message || 'Login failed');
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -116,64 +118,22 @@ const Login = () => {
               {/* Form Header */}
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                  {isLogin ? 'Welcome Back!' : 'Create Account'}
+                  Welcome Back!
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {isLogin ? 'Sign in to access your account' : 'Sign up to get started'}
+                  Sign in to access your dashboard
                 </p>
               </div>
 
-              {/* Social Login Buttons */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white py-3 px-4 rounded-lg transition-all duration-200 font-medium"
-                >
-                  <FaGoogle className="text-lg" />
-                  Google
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white py-3 px-4 rounded-lg transition-all duration-200 font-medium"
-                >
-                  <FaGithub className="text-lg" />
-                  GitHub
-                </button>
-              </div>
-
-              {/* Divider */}
-              <div className="relative mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+                  {error}
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with email</span>
-                </div>
-              </div>
+              )}
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
-                {!isLogin && (
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required={!isLogin}
-                        className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 pl-11 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all duration-200"
-                        placeholder="John Doe"
-                      />
-                      <HiUserAdd className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-                    </div>
-                  </div>
-                )}
-
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Email Address
@@ -182,12 +142,12 @@ const Login = () => {
                     <input
                       type="email"
                       id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 pl-11 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all duration-200"
-                      placeholder="you@example.com"
+                      disabled={isLoading}
+                      className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 pl-11 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      placeholder="admintest@gmail.com"
                     />
                     <HiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
                   </div>
@@ -201,92 +161,43 @@ const Login = () => {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 pl-11 pr-11 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all duration-200"
+                      disabled={isLoading}
+                      className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 pl-11 pr-11 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="••••••••"
                     />
                     <HiLockClosed className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      disabled={isLoading}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50"
                     >
                       {showPassword ? <HiEyeOff className="text-xl" /> : <HiEye className="text-xl" />}
                     </button>
                   </div>
                 </div>
 
-                {!isLogin && (
-                  <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Confirm Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        required={!isLogin}
-                        className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 pl-11 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 outline-none transition-all duration-200"
-                        placeholder="••••••••"
-                      />
-                      <HiLockClosed className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-                    </div>
-                  </div>
-                )}
-
-                {isLogin && (
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => alert('Password reset functionality coming soon!')}
-                      className="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                )}
-
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium py-3 px-6 rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-purple-300 dark:focus:ring-purple-800 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium py-3 px-6 rounded-lg hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-purple-300 dark:focus:ring-purple-800 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  {isLogin ? (
-                    <>
-                      <HiLogin className="text-xl" />
-                      Sign In
-                    </>
-                  ) : (
-                    <>
-                      <HiUserAdd className="text-xl" />
-                      Create Account
-                    </>
-                  )}
+                  <HiLogin className="text-xl" />
+                  {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
               </form>
 
-              {/* Toggle Login/Signup */}
-              <div className="mt-6 text-center">
-                <p className="text-gray-600 dark:text-gray-400">
-                  {isLogin ? "Don't have an account? " : "Already have an account? "}
-                  <button
-                    onClick={toggleMode}
-                    className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
-                  >
-                    {isLogin ? 'Sign up' : 'Sign in'}
-                  </button>
+              {/* Demo Credentials */}
+              <div className="mt-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <p className="text-xs font-medium text-purple-900 dark:text-purple-300 mb-2">Demo Credentials:</p>
+                <p className="text-xs text-purple-700 dark:text-purple-400">
+                  Email: <span className="font-mono font-semibold">admintest@gmail.com</span>
+                </p>
+                <p className="text-xs text-purple-700 dark:text-purple-400">
+                  Password: <span className="font-mono font-semibold">admin123</span>
                 </p>
               </div>
 

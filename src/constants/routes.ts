@@ -8,6 +8,7 @@ export const ROUTES = {
   TECH_STACK: '/tech-stack',
   TECH_DETAIL: '/tech/:techId',
   LOGIN: '/login',
+  DASHBOARD: '/dashboard',
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

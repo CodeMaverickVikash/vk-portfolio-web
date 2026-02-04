@@ -4,4 +4,5 @@ export { default as Contact } from './Contact';
 export { default as Login } from './Login';
 export { default as TechStack } from './TechStack';
 export { default as TechDetail } from './TechDetail';
+export { default as Dashboard } from './Dashboard';
 

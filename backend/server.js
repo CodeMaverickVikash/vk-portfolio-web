@@ -57,7 +57,9 @@ app.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log('📚 Available Endpoints:');
   console.log(`   🔑 Login:         POST   http://localhost:${PORT}/api/auth/login`);
+  console.log(`   🔄 Refresh Token: POST   http://localhost:${PORT}/api/auth/refresh`);
   console.log(`   👤 Get User:      GET    http://localhost:${PORT}/api/auth/me (Protected)`);
+  console.log(`   🚪 Logout:        POST   http://localhost:${PORT}/api/auth/logout (Protected)`);
   console.log('='.repeat(60));
   console.log('💡 Tip: Use the test-api.http file to test endpoints');
   console.log('='.repeat(60) + '\n');

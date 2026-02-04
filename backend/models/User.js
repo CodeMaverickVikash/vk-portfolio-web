@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  refreshToken: {
+    type: String,
+    select: false // Don't return refresh token by default
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -79,6 +83,7 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 userSchema.methods.toJSON = function() {
   const user = this.toObject();
   delete user.password;
+  delete user.refreshToken;
   delete user.__v;
   return user;
 };
