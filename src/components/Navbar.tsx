@@ -1,18 +1,28 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NavbarLogo } from './Logo';
-import { HiHome, HiUser, HiMail, HiMoon, HiSun, HiArrowRight, HiMenu, HiX, HiCode } from 'react-icons/hi';
+import { HiHome, HiUser, HiMail, HiMoon, HiSun, HiArrowRight, HiMenu, HiX, HiCode, HiLogout, HiShieldCheck } from 'react-icons/hi';
 import { NavbarProps } from '../types';
 import { ROUTES } from '../constants';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = (props: NavbarProps) => {
   const {onToggle, isDarkModeEnabled} = props;
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Helper function to check if link is active
   const isActive = (path: string): boolean => {
     return location.pathname === path;
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    await logout();
+    navigate(ROUTES.HOME);
+    setIsSidebarOpen(false);
   };
 
   // Helper function to get link classes
@@ -84,13 +94,31 @@ const Navbar = (props: NavbarProps) => {
                 <HiSun className="w-5 h-5 text-yellow-500" />
               )}
             </button>
-            <Link
-              to={ROUTES.LOGIN}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0 py-2 px-5 focus:outline-none hover:from-purple-700 hover:to-indigo-700 rounded-lg text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-            >
-              Sign in
-              <HiArrowRight className="text-lg" />
-            </Link>
+
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-gray-700">
+                  <HiShieldCheck className="text-purple-600 dark:text-purple-400" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{user.name}</span>
+                  <span className="text-xs px-2 py-0.5 bg-purple-600 text-white rounded-full">{user.role}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0 py-2 px-5 focus:outline-none hover:from-purple-700 hover:to-indigo-700 rounded-lg text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                >
+                  <HiLogout className="text-lg" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                to={ROUTES.LOGIN}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0 py-2 px-5 focus:outline-none hover:from-purple-700 hover:to-indigo-700 rounded-lg text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+              >
+                Sign in
+                <HiArrowRight className="text-lg" />
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -190,14 +218,36 @@ const Navbar = (props: NavbarProps) => {
 
           {/* Sidebar Footer */}
           <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
-            <Link
-              to={ROUTES.LOGIN}
-              onClick={handleLinkClick}
-              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0 py-3 px-5 focus:outline-none hover:from-purple-700 hover:to-indigo-700 rounded-lg text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              Sign in
-              <HiArrowRight className="text-lg" />
-            </Link>
+            {user ? (
+              <>
+                <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-gray-700 mb-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full flex items-center justify-center">
+                    <HiShieldCheck className="text-white text-xl" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                  </div>
+                  <span className="text-xs px-2 py-1 bg-purple-600 text-white rounded-full">{user.role}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0 py-3 px-5 focus:outline-none hover:from-purple-700 hover:to-indigo-700 rounded-lg text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <HiLogout className="text-lg" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to={ROUTES.LOGIN}
+                onClick={handleLinkClick}
+                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0 py-3 px-5 focus:outline-none hover:from-purple-700 hover:to-indigo-700 rounded-lg text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                Sign in
+                <HiArrowRight className="text-lg" />
+              </Link>
+            )}
             <p className="text-center text-sm text-gray-500 dark:text-gray-400">
               © 2024 Vikash Maskhare
             </p>

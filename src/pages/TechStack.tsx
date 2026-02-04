@@ -6,6 +6,7 @@ import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBoot
 import { Category } from '../types';
 import { ROUTES } from '../constants';
 import { api } from '../config/api';
+import { getDifficultyColor } from '../utils/utils';
 
 interface TechItem {
   id: string;
@@ -83,15 +84,6 @@ const TechStack = () => {
     const matchesSearch = tech.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
-  const getDifficultyColor = (difficulty: 'Beginner' | 'Intermediate' | 'Advanced'): string => {
-    switch(difficulty) {
-      case 'Beginner': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
-      case 'Intermediate': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
-      case 'Advanced': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
-    }
-  };
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 py-20">
