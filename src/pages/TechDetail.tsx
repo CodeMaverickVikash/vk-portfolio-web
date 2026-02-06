@@ -1,11 +1,12 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { HiBookOpen, HiCode, HiLightningBolt, HiExternalLink, HiCheckCircle, HiChevronLeft, HiChevronRight, HiArrowLeft } from 'react-icons/hi';
-import { FaReact, FaAngular, FaNodeJs, FaHtml5, FaCss3Alt, FaGitAlt, FaDocker } from 'react-icons/fa';
-import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBootstrap, SiRedux, SiMysql, SiPostgresql, SiPostman, SiNpm, SiWebpack } from 'react-icons/si';
+import { FaReact, FaAngular, FaNodeJs, FaHtml5, FaCss3Alt, FaGitAlt, FaDocker, FaCode } from 'react-icons/fa';
+import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBootstrap, SiRedux, SiMysql, SiPostgresql, SiPostman, SiNpm, SiWebpack, SiGit } from 'react-icons/si';
 import { IconType } from 'react-icons';
 import { ROUTES } from '../constants';
 import { getDifficultyColor } from '../utils/utils';
+import { api } from '../config/api';
 
 interface Topic {
   id: number;
@@ -22,22 +23,53 @@ interface Resource {
 }
 
 interface TechData {
+  id: string;
   name: string;
-  icon: IconType;
+  icon: string;
   gradient: string;
   description: string;
   category: string;
   year: string;
+  paradigm: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   topics: Topic[];
   resources: Resource[];
-  keyFeatures: string[];
+  features: string[];
   useCases: string[];
+  isActive: boolean;
 }
+
+// Icon mapping
+const iconMap: Record<string, IconType> = {
+  SiJavascript,
+  SiTypescript,
+  FaReact,
+  FaAngular,
+  FaHtml5,
+  FaCss3Alt,
+  SiTailwindcss,
+  SiBootstrap,
+  SiRedux,
+  FaNodeJs,
+  SiExpress,
+  SiMongodb,
+  SiMysql,
+  SiPostgresql,
+  SiGit,
+  FaGitAlt,
+  FaDocker,
+  SiPostman,
+  SiNpm,
+  SiWebpack,
+  FaCode,
+};
 
 const TechDetail = () => {
   const { techId } = useParams<{ techId: string }>();
   const [selectedTopicId, setSelectedTopicId] = useState<number>(0);
+  const [techData, setTechData] = useState<TechData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {
@@ -52,270 +84,76 @@ const TechDetail = () => {
     }
   };
 
-  // Technology data mapping
-  const techDataMap: Record<string, TechData> = {
-    'react': {
-      name: 'React',
-      icon: FaReact,
-      gradient: 'from-cyan-400 to-blue-500',
-      description: 'A JavaScript library for building user interfaces. React makes it painless to create interactive UIs with a component-based architecture.',
-      category: 'Frontend Framework',
-      year: '2013',
-      difficulty: 'Intermediate',
-      topics: [
-        {
-          id: 0,
-          title: 'Introduction to React',
-          description: 'Get started with React - understand what it is, why it\'s popular, and where it\'s used',
-          subtopics: [],
-          isIntro: true
-        },
-        {
-          id: 1,
-          title: 'Core Concepts',
-          description: 'Fundamental concepts every React developer should master',
-          subtopics: ['JSX Syntax', 'Components & Props', 'State Management', 'Lifecycle Methods', 'Virtual DOM']
-        },
-        {
-          id: 2,
-          title: 'Hooks',
-          description: 'Modern React features for functional components',
-          subtopics: ['useState', 'useEffect', 'useContext', 'useReducer', 'useMemo', 'useCallback', 'Custom Hooks']
-        },
-        {
-          id: 3,
-          title: 'Advanced Patterns',
-          description: 'Advanced techniques for scalable React applications',
-          subtopics: ['Higher-Order Components', 'Render Props', 'Context API', 'Error Boundaries', 'Code Splitting']
-        },
-        {
-          id: 4,
-          title: 'State Management',
-          description: 'Managing application state effectively',
-          subtopics: ['Redux', 'Context API', 'Zustand', 'Recoil', 'MobX']
-        },
-        {
-          id: 5,
-          title: 'Routing',
-          description: 'Navigation and routing in React applications',
-          subtopics: ['React Router', 'Dynamic Routes', 'Protected Routes', 'Nested Routes', 'Route Parameters']
-        },
-        {
-          id: 6,
-          title: 'Performance Optimization',
-          description: 'Techniques to optimize React application performance',
-          subtopics: ['React.memo', 'useMemo & useCallback', 'Lazy Loading', 'Code Splitting', 'Virtualization']
-        }
-      ],
-      resources: [
-        { title: 'Official React Documentation', url: 'https://react.dev', type: 'Official' },
-        { title: 'React Tutorial for Beginners', url: 'https://react.dev/learn', type: 'Tutorial' },
-        { title: 'React Hooks Guide', url: 'https://react.dev/reference/react', type: 'Documentation' },
-        { title: 'Advanced React Patterns', url: 'https://kentcdodds.com/blog', type: 'Article' }
-      ],
-      keyFeatures: ['Component-Based', 'Virtual DOM', 'JSX', 'Unidirectional Data Flow', 'Rich Ecosystem'],
-      useCases: ['Single Page Applications', 'Progressive Web Apps', 'Mobile Apps (React Native)', 'Dashboard UIs']
-    },
-    'angular': {
-      name: 'Angular',
-      icon: FaAngular,
-      gradient: 'from-red-500 to-red-700',
-      description: 'A TypeScript-based framework for building scalable web applications. Angular provides a complete solution with built-in features.',
-      category: 'Frontend Framework',
-      year: '2016',
-      difficulty: 'Advanced',
-      topics: [
-        {
-          id: 0,
-          title: 'Introduction to Angular',
-          description: 'Get started with Angular - understand what it is, why it\'s powerful, and where it\'s used',
-          subtopics: [],
-          isIntro: true
-        },
-        {
-          id: 1,
-          title: 'Core Concepts',
-          description: 'Essential Angular fundamentals',
-          subtopics: ['Components', 'Templates', 'Directives', 'Services', 'Dependency Injection']
-        },
-        {
-          id: 2,
-          title: 'Modules & Architecture',
-          description: 'Organizing Angular applications',
-          subtopics: ['NgModules', 'Feature Modules', 'Shared Modules', 'Core Module', 'Lazy Loading']
-        },
-        {
-          id: 3,
-          title: 'Reactive Programming',
-          description: 'Working with RxJS and Observables',
-          subtopics: ['Observables', 'Operators', 'Subjects', 'Async Pipe', 'Error Handling']
-        },
-        {
-          id: 4,
-          title: 'Forms',
-          description: 'Building and validating forms',
-          subtopics: ['Template-Driven Forms', 'Reactive Forms', 'Form Validation', 'Custom Validators', 'Dynamic Forms']
-        },
-        {
-          id: 5,
-          title: 'Routing & Navigation',
-          description: 'Angular Router and navigation strategies',
-          subtopics: ['Router Configuration', 'Route Guards', 'Lazy Loading Routes', 'Route Resolvers', 'Child Routes']
-        },
-        {
-          id: 6,
-          title: 'State Management',
-          description: 'Managing application state in Angular',
-          subtopics: ['Services', 'NgRx', 'Akita', 'BehaviorSubject', 'State Patterns']
-        }
-      ],
-      resources: [
-        { title: 'Official Angular Documentation', url: 'https://angular.io/docs', type: 'Official' },
-        { title: 'Angular Tutorial', url: 'https://angular.io/tutorial', type: 'Tutorial' },
-        { title: 'RxJS Documentation', url: 'https://rxjs.dev', type: 'Documentation' },
-        { title: 'Angular University', url: 'https://angular-university.io', type: 'Tutorial' }
-      ],
-      keyFeatures: ['TypeScript Native', 'Two-way Data Binding', 'Dependency Injection', 'RxJS Integration', 'CLI Tools'],
-      useCases: ['Enterprise Applications', 'Large-scale SPAs', 'Admin Dashboards', 'Progressive Web Apps']
-    },
-    'typescript': {
-      name: 'TypeScript',
-      icon: SiTypescript,
-      gradient: 'from-blue-500 to-blue-700',
-      description: 'TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale.',
-      category: 'Programming Language',
-      year: '2012',
-      difficulty: 'Advanced',
-      topics: [
-        {
-          id: 0,
-          title: 'Introduction to TypeScript',
-          description: 'Get started with TypeScript - understand what it is, why it\'s essential, and where it\'s used',
-          subtopics: [],
-          isIntro: true
-        },
-        {
-          id: 1,
-          title: 'Basic Types',
-          description: 'Understanding TypeScript type system',
-          subtopics: ['Primitive Types', 'Arrays & Tuples', 'Enums', 'Any & Unknown', 'Void & Never']
-        },
-        {
-          id: 2,
-          title: 'Advanced Types',
-          description: 'Complex type constructs',
-          subtopics: ['Union Types', 'Intersection Types', 'Type Guards', 'Type Assertions', 'Literal Types']
-        },
-        {
-          id: 3,
-          title: 'Interfaces & Classes',
-          description: 'Object-oriented programming in TypeScript',
-          subtopics: ['Interfaces', 'Classes', 'Abstract Classes', 'Inheritance', 'Access Modifiers']
-        },
-        {
-          id: 4,
-          title: 'Generics',
-          description: 'Creating reusable components with generics',
-          subtopics: ['Generic Functions', 'Generic Classes', 'Generic Constraints', 'Generic Interfaces', 'Utility Types']
-        },
-        {
-          id: 5,
-          title: 'Decorators',
-          description: 'Meta-programming with decorators',
-          subtopics: ['Class Decorators', 'Method Decorators', 'Property Decorators', 'Parameter Decorators']
-        },
-        {
-          id: 6,
-          title: 'Modules & Namespaces',
-          description: 'Code organization in TypeScript',
-          subtopics: ['ES6 Modules', 'Namespaces', 'Module Resolution', 'Declaration Files', 'Ambient Declarations']
-        }
-      ],
-      resources: [
-        { title: 'Official TypeScript Handbook', url: 'https://www.typescriptlang.org/docs/', type: 'Official' },
-        { title: 'TypeScript Deep Dive', url: 'https://basarat.gitbook.io/typescript/', type: 'Documentation' },
-        { title: 'TypeScript Playground', url: 'https://www.typescriptlang.org/play', type: 'Tutorial' }
-      ],
-      keyFeatures: ['Static Typing', 'Type Inference', 'Interfaces', 'Generics', 'Enhanced IDE Support'],
-      useCases: ['Large-scale Applications', 'Enterprise Software', 'Type-safe APIs', 'Library Development']
-    },
-    'javascript': {
-      name: 'JavaScript',
-      icon: SiJavascript,
-      gradient: 'from-yellow-400 to-yellow-600',
-      description: 'JavaScript is the programming language of the web, enabling interactive and dynamic content on websites.',
-      category: 'Programming Language',
-      year: '1995',
-      difficulty: 'Intermediate',
-      topics: [
-        {
-          id: 0,
-          title: 'Introduction to JavaScript',
-          description: 'Get started with JavaScript - understand what it is, why it\'s everywhere, and where it\'s used',
-          subtopics: [],
-          isIntro: true
-        },
-        {
-          id: 1,
-          title: 'Fundamentals',
-          description: 'Core JavaScript concepts',
-          subtopics: ['Variables & Data Types', 'Operators', 'Control Flow', 'Functions', 'Scope']
-        },
-        {
-          id: 2,
-          title: 'ES6+ Features',
-          description: 'Modern JavaScript features',
-          subtopics: ['Arrow Functions', 'Destructuring', 'Spread/Rest', 'Template Literals', 'Modules']
-        },
-        {
-          id: 3,
-          title: 'Asynchronous JavaScript',
-          description: 'Handling async operations',
-          subtopics: ['Callbacks', 'Promises', 'Async/Await', 'Event Loop', 'Fetch API']
-        },
-        {
-          id: 4,
-          title: 'DOM Manipulation',
-          description: 'Interacting with the Document Object Model',
-          subtopics: ['Selecting Elements', 'Event Handling', 'DOM Traversal', 'Creating Elements', 'Modifying Styles']
-        },
-        {
-          id: 5,
-          title: 'Object-Oriented JavaScript',
-          description: 'OOP concepts in JavaScript',
-          subtopics: ['Objects', 'Prototypes', 'Classes', 'Inheritance', 'Encapsulation']
-        },
-        {
-          id: 6,
-          title: 'Functional Programming',
-          description: 'Functional programming paradigms',
-          subtopics: ['Pure Functions', 'Higher-Order Functions', 'Map/Filter/Reduce', 'Closures', 'Immutability']
-        }
-      ],
-      resources: [
-        { title: 'MDN JavaScript Guide', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide', type: 'Official' },
-        { title: 'JavaScript.info', url: 'https://javascript.info', type: 'Tutorial' },
-        { title: 'You Don\'t Know JS', url: 'https://github.com/getify/You-Dont-Know-JS', type: 'Documentation' }
-      ],
-      keyFeatures: ['Dynamic Typing', 'First-class Functions', 'Prototype-based OOP', 'Event-driven', 'Async/Await'],
-      useCases: ['Web Development', 'Server-side (Node.js)', 'Mobile Apps', 'Desktop Apps']
-    }
-  };
+  // Fetch technology data from API
+  useEffect(() => {
+    const fetchTechData = async () => {
+      if (!techId) {
+        setError('No technology ID provided');
+        setLoading(false);
+        return;
+      }
 
-  // Get technology data or show not found
-  const techData = techId ? techDataMap[techId.toLowerCase()] : null;
+      try {
+        setLoading(true);
+        setError(null);
 
-  if (!techData) {
+        // Fetch all tech stack data
+        const response = await api.techStack.getAll({ isActive: true });
+
+        if (response.success && response.data) {
+          // Find the technology by matching the name (converted to URL-friendly format)
+          const tech = response.data.find((item: TechData) =>
+            item.name.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '') === techId.toLowerCase()
+          );
+
+          if (tech) {
+            setTechData(tech);
+          } else {
+            setError('Technology not found');
+          }
+        } else {
+          setError('Failed to load technology data');
+        }
+      } catch (err) {
+        console.error('Error fetching tech data:', err);
+        setError('Failed to load technology data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTechData();
+  }, [techId]);
+
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Technology Not Found</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">The technology you're looking for doesn't exist.</p>
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading technology details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error or Not Found state
+  if (error || !techData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <HiCode className="text-6xl text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            {error || 'Technology Not Found'}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            The technology you're looking for doesn't exist or couldn't be loaded.
+          </p>
           <Link
             to={ROUTES.TECH_STACK}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl"
           >
-            <HiArrowLeft />
+            <HiArrowLeft className="text-lg" />
             Back to Tech Stack
           </Link>
         </div>
@@ -323,7 +161,8 @@ const TechDetail = () => {
     );
   }
 
-  const Icon = techData.icon;
+  // Get icon component from icon map
+  const Icon = iconMap[techData.icon] || FaCode;
 
   const getResourceTypeColor = (type: string) => {
     switch (type) {
@@ -335,6 +174,9 @@ const TechDetail = () => {
       default: return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400';
     }
   };
+
+  // Get selected topic
+  const selectedTopic = techData.topics.find(t => t.id === selectedTopicId) || techData.topics[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
@@ -398,108 +240,91 @@ const TechDetail = () => {
             </div>
           </div>
 
-          {selectedTopicId === 0 ? (
-            /* Introduction/Skill Details - Full Width */
-            <div>
-              {/* Hero Section with Overview */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 mb-6">
-                <div className="grid lg:grid-cols-2 gap-6">
-                  {/* Left: Title & Overview */}
-                  <div>
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className={`w-16 h-16 bg-gradient-to-br ${techData.gradient} rounded-xl flex items-center justify-center shadow-lg flex-shrink-0`}>
-                        <Icon className="text-4xl text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                          {techData.name}
-                        </h1>
-                        <div className="flex items-center gap-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getDifficultyColor(techData.difficulty)}`}>
-                            {techData.difficulty}
-                          </span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">Since {techData.year}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-                      {techData.description}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      {techData.name} is a {techData.category.toLowerCase()} that has been empowering developers since {techData.year}.
-                      It's designed to help you build modern, scalable applications with confidence and efficiency.
-                    </p>
+          {/* Content Area - Full Width */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
+            {selectedTopic?.isIntro ? (
+              /* Introduction Tab - Full Page Layout */
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-start gap-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${techData.gradient} shadow-lg`}>
+                    <Icon className="text-5xl text-white" />
                   </div>
-
-                  {/* Right: Key Features */}
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                      <HiLightningBolt className="text-purple-600" />
-                      Key Features
-                    </h2>
-                    <div className="grid grid-cols-1 gap-2">
-                      {techData.keyFeatures.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg">
-                          <HiCheckCircle className="text-green-500 text-lg flex-shrink-0" />
-                          <span className="text-gray-800 dark:text-gray-200 text-sm font-medium">{feature}</span>
-                        </div>
-                      ))}
+                  <div className="flex-1">
+                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{techData.name}</h1>
+                    <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">{techData.description}</p>
+                    <div className="flex flex-wrap gap-3">
+                      <span className="px-3 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-full text-sm font-medium">
+                        {techData.category}
+                      </span>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-medium">
+                        Since {techData.year}
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor(techData.difficulty)}`}>
+                        {techData.difficulty}
+                      </span>
+                      <span className="px-3 py-1 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-full text-sm font-medium">
+                        {techData.paradigm}
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Bottom Grid: Use Cases & Resources */}
-              <div className="grid lg:grid-cols-2 gap-6">
-                {/* Use Cases */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <HiCode className="text-purple-600" />
-                    Common Use Cases
-                  </h2>
-                  <div className="space-y-2">
-                    {techData.useCases.map((useCase, index) => (
-                      <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          {index + 1}
-                        </div>
-                        <p className="text-gray-800 dark:text-gray-200 text-sm">{useCase}</p>
-                      </div>
-                    ))}
+                {/* Two Column Layout for Features and Use Cases */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Key Features */}
+                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-5 border border-purple-100 dark:border-purple-800">
+                    <div className="flex items-center gap-2 mb-4">
+                      <HiLightningBolt className="text-2xl text-purple-600 dark:text-purple-400" />
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">Key Features</h2>
+                    </div>
+                    <ul className="space-y-2">
+                      {techData.features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                          <HiCheckCircle className="text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <button
-                      onClick={() => setSelectedTopicId(1)}
-                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
-                    >
-                      Start Learning
-                      <HiArrowLeft className="rotate-180" />
-                    </button>
+
+                  {/* Use Cases */}
+                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-5 border border-blue-100 dark:border-blue-800">
+                    <div className="flex items-center gap-2 mb-4">
+                      <HiCode className="text-2xl text-blue-600 dark:text-blue-400" />
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">Use Cases</h2>
+                    </div>
+                    <ul className="space-y-2">
+                      {techData.useCases.map((useCase, index) => (
+                        <li key={index} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                          <HiCheckCircle className="text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                          <span>{useCase}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
 
                 {/* Learning Resources */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                    <HiBookOpen className="text-purple-600" />
-                    Learning Resources
-                  </h2>
-                  <div className="space-y-2">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-5 border border-green-100 dark:border-green-800">
+                  <div className="flex items-center gap-2 mb-4">
+                    <HiBookOpen className="text-2xl text-green-600 dark:text-green-400" />
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Learning Resources</h2>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
                     {techData.resources.map((resource, index) => (
                       <a
                         key={index}
                         href={resource.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md transition-all group"
+                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg hover:shadow-md transition-all border border-gray-200 dark:border-gray-700 group"
                       >
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                            {resource.title}
-                          </h3>
-                          <HiExternalLink className="text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 flex-shrink-0" />
+                        <div className="flex items-center gap-3">
+                          <HiExternalLink className="text-gray-400 dark:text-gray-500 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors" />
+                          <span className="font-medium text-gray-900 dark:text-white">{resource.title}</span>
                         </div>
-                        <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getResourceTypeColor(resource.type)}`}>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getResourceTypeColor(resource.type)}`}>
                           {resource.type}
                         </span>
                       </a>
@@ -507,52 +332,30 @@ const TechDetail = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            /* Topic Detail View - Full Width */
-            <div>
+            ) : (
+              /* Topic Detail View */
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{selectedTopic?.title}</h2>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedTopic?.description}</p>
+                </div>
 
-            {/* Topic Content - Full Width */}
-            {techData.topics.filter(topic => topic.id === selectedTopicId).map((topic) => (
-              <div key={topic.id}>
-                {/* Topic Header & Subtopics */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 mb-6">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-                      {topic.id}
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        {topic.title}
-                      </h2>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        {topic.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Subtopics Grid - Compact */}
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
-                      What You'll Learn
-                    </h3>
-                    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-2">
-                      {topic.subtopics.map((subtopic, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-2 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800/50"
-                        >
-                          <HiCheckCircle className="text-purple-600 text-lg flex-shrink-0" />
-                          <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{subtopic}</span>
+                {selectedTopic && selectedTopic.subtopics.length > 0 && (
+                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl p-5 border border-purple-100 dark:border-purple-800">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">Topics to Master</h3>
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      {selectedTopic.subtopics.map((subtopic, index) => (
+                        <div key={index} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                          <HiCheckCircle className="text-purple-500 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                          <span>{subtopic}</span>
                         </div>
                       ))}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
-            ))}
+            )}
           </div>
-          )}
         </div>
       </div>
     </div>
@@ -560,4 +363,3 @@ const TechDetail = () => {
 };
 
 export default TechDetail;
-

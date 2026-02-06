@@ -52,6 +52,30 @@ const techStackSchema = new mongoose.Schema({
     enum: ['Beginner', 'Intermediate', 'Advanced'],
     trim: true
   },
+  topics: {
+    type: [{
+      id: { type: Number, required: true },
+      title: { type: String, required: true, trim: true },
+      description: { type: String, required: true, trim: true },
+      content: { type: String, default: '' }, // Rich text HTML content
+      subtopics: { type: [String], default: [] },
+      isIntro: { type: Boolean, default: false }
+    }],
+    default: []
+  },
+  resources: {
+    type: [{
+      title: { type: String, required: true, trim: true },
+      url: { type: String, required: true, trim: true },
+      type: {
+        type: String,
+        required: true,
+        enum: ['Official', 'Tutorial', 'Documentation', 'Video', 'Article'],
+        trim: true
+      }
+    }],
+    default: []
+  },
   isActive: {
     type: Boolean,
     default: true

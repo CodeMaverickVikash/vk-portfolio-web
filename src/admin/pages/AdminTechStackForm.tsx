@@ -1,23 +1,19 @@
 import { useState, useEffect } from 'react';
-import { HiX, HiSave, HiPlus, HiTrash } from 'react-icons/hi';
+import { useNavigate, useParams } from 'react-router-dom';
+import { HiArrowLeft, HiSave, HiPlus, HiX, HiTrash } from 'react-icons/hi';
 import { FaReact, FaNodeJs, FaAngular, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBootstrap, SiRedux, SiMysql, SiPostgresql, SiGit, SiDocker, SiPostman } from 'react-icons/si';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-
-interface TechStackModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: TechFormData) => Promise<void>;
-  initialData?: TechFormData | null;
-  mode: 'add' | 'edit';
-}
+import AdminLayout from '../layouts/AdminLayout';
+import { api } from '../../config/api';
+import { ADMIN_ROUTES } from '../routes';
 
 interface Topic {
   id: number;
   title: string;
   description: string;
-  content: string; // Rich text HTML content
+  content: string;
   subtopics: string[];
   isIntro: boolean;
 }
@@ -28,23 +24,29 @@ interface Resource {
   type: 'Official' | 'Tutorial' | 'Documentation' | 'Video' | 'Article';
 }
 
-export interface TechFormData {
+interface TechFormData {
   id?: string;
   name: string;
   description: string;
-  category: string;
+  category: 'Frontend' | 'Backend' | 'Database' | 'Framework' | 'Tools';
   year: string;
   paradigm: string;
   features: string[];
   useCases: string[];
   icon: string;
   gradient: string;
-  difficulty: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   topics: Topic[];
   resources: Resource[];
 }
 
-// Available icons
+// Icon mapping
+const iconMap: Record<string, any> = {
+  SiJavascript, SiTypescript, FaReact, FaAngular, FaHtml5, FaCss3Alt,
+  SiTailwindcss, SiBootstrap, SiRedux, FaNodeJs, SiExpress, SiMongodb,
+  SiMysql, SiPostgresql, SiGit, SiDocker, SiPostman,
+};
+
 const availableIcons = [
   { name: 'SiJavascript', component: SiJavascript, label: 'JavaScript' },
   { name: 'SiTypescript', component: SiTypescript, label: 'TypeScript' },
@@ -65,26 +67,24 @@ const availableIcons = [
   { name: 'SiPostman', component: SiPostman, label: 'Postman' },
 ];
 
-// Available gradients
 const availableGradients = [
-  { value: 'from-yellow-400 to-yellow-600', label: 'Yellow', preview: 'bg-gradient-to-r from-yellow-400 to-yellow-600' },
   { value: 'from-blue-500 to-blue-700', label: 'Blue', preview: 'bg-gradient-to-r from-blue-500 to-blue-700' },
-  { value: 'from-cyan-400 to-blue-500', label: 'Cyan-Blue', preview: 'bg-gradient-to-r from-cyan-400 to-blue-500' },
-  { value: 'from-red-500 to-red-700', label: 'Red', preview: 'bg-gradient-to-r from-red-500 to-red-700' },
-  { value: 'from-orange-500 to-red-500', label: 'Orange-Red', preview: 'bg-gradient-to-r from-orange-500 to-red-500' },
-  { value: 'from-blue-400 to-blue-600', label: 'Light Blue', preview: 'bg-gradient-to-r from-blue-400 to-blue-600' },
-  { value: 'from-green-500 to-green-700', label: 'Green', preview: 'bg-gradient-to-r from-green-500 to-green-700' },
-  { value: 'from-gray-600 to-gray-800', label: 'Gray', preview: 'bg-gradient-to-r from-gray-600 to-gray-800' },
   { value: 'from-purple-500 to-purple-700', label: 'Purple', preview: 'bg-gradient-to-r from-purple-500 to-purple-700' },
-  { value: 'from-cyan-400 to-teal-500', label: 'Cyan-Teal', preview: 'bg-gradient-to-r from-cyan-400 to-teal-500' },
-  { value: 'from-purple-600 to-purple-800', label: 'Dark Purple', preview: 'bg-gradient-to-r from-purple-600 to-purple-800' },
-  { value: 'from-blue-600 to-indigo-600', label: 'Blue-Indigo', preview: 'bg-gradient-to-r from-blue-600 to-indigo-600' },
-  { value: 'from-orange-500 to-red-600', label: 'Orange', preview: 'bg-gradient-to-r from-orange-500 to-red-600' },
-  { value: 'from-blue-500 to-cyan-500', label: 'Blue-Cyan', preview: 'bg-gradient-to-r from-blue-500 to-cyan-500' },
-  { value: 'from-orange-500 to-orange-600', label: 'Light Orange', preview: 'bg-gradient-to-r from-orange-500 to-orange-600' },
+  { value: 'from-green-500 to-green-700', label: 'Green', preview: 'bg-gradient-to-r from-green-500 to-green-700' },
+  { value: 'from-red-500 to-red-700', label: 'Red', preview: 'bg-gradient-to-r from-red-500 to-red-700' },
+  { value: 'from-yellow-500 to-yellow-700', label: 'Yellow', preview: 'bg-gradient-to-r from-yellow-500 to-yellow-700' },
+  { value: 'from-pink-500 to-pink-700', label: 'Pink', preview: 'bg-gradient-to-r from-pink-500 to-pink-700' },
+  { value: 'from-indigo-500 to-indigo-700', label: 'Indigo', preview: 'bg-gradient-to-r from-indigo-500 to-indigo-700' },
+  { value: 'from-cyan-500 to-cyan-700', label: 'Cyan', preview: 'bg-gradient-to-r from-cyan-500 to-cyan-700' },
+  { value: 'from-orange-500 to-orange-700', label: 'Orange', preview: 'bg-gradient-to-r from-orange-500 to-orange-700' },
+  { value: 'from-teal-500 to-teal-700', label: 'Teal', preview: 'bg-gradient-to-r from-teal-500 to-teal-700' },
 ];
 
-const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave, initialData, mode }) => {
+const AdminTechStackForm = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = !!id;
+
   const [formData, setFormData] = useState<TechFormData>({
     name: '',
     description: '',
@@ -99,36 +99,41 @@ const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave
     topics: [],
     resources: [],
   });
-  const [saving, setSaving] = useState(false);
+
   const [activeTab, setActiveTab] = useState<'basic' | 'topics' | 'resources'>('basic');
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
+  // Fetch tech data if editing
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    } else {
-      // Reset form for add mode
-      setFormData({
-        name: '',
-        description: '',
-        category: 'Frontend',
-        year: new Date().getFullYear().toString(),
-        paradigm: '',
-        features: [''],
-        useCases: [''],
-        icon: 'SiJavascript',
-        gradient: 'from-blue-500 to-blue-700',
-        difficulty: 'Intermediate',
-        topics: [],
-        resources: [],
-      });
+    if (isEditMode && id) {
+      fetchTechData(id);
     }
-    setActiveTab('basic');
-  }, [initialData, isOpen]);
+  }, [id, isEditMode]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const fetchTechData = async (techId: string) => {
+    try {
+      setLoading(true);
+      const response = await api.techStack.getById(techId);
+      if (response.success) {
+        setFormData(response.data);
+      } else {
+        alert('Failed to load technology data');
+        navigate(ADMIN_ROUTES.TECH_STACK);
+      }
+    } catch (error) {
+      console.error('Error fetching tech data:', error);
+      alert('Error loading technology data');
+      navigate(ADMIN_ROUTES.TECH_STACK);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof TechFormData, value: any) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [field]: value,
     });
   };
 
@@ -234,42 +239,79 @@ const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave
 
     setSaving(true);
     try {
-      await onSave(cleanedData);
-      onClose();
+      if (isEditMode) {
+        const response = await api.techStack.update(id!, cleanedData);
+        if (response.success) {
+          alert('Technology updated successfully!');
+          navigate(ADMIN_ROUTES.TECH_STACK);
+        } else {
+          alert(response.message || 'Failed to update technology');
+        }
+      } else {
+        const response = await api.techStack.create(cleanedData);
+        if (response.success) {
+          alert('Technology added successfully!');
+          navigate(ADMIN_ROUTES.TECH_STACK);
+        } else {
+          alert(response.message || 'Failed to add technology');
+        }
+      }
     } catch (error) {
-      console.error('Error saving:', error);
+      console.error('Error saving tech:', error);
+      alert('Error saving technology');
     } finally {
       setSaving(false);
     }
   };
 
-  if (!isOpen) return null;
+  const IconComponent = iconMap[formData.icon] || SiJavascript;
 
-  const selectedIcon = availableIcons.find(i => i.name === formData.icon);
-  const IconComponent = selectedIcon?.component || SiJavascript;
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading technology data...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose}></div>
-
-      {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 flex items-center justify-between rounded-t-xl">
-            <h2 className="text-2xl font-bold text-white">
-              {mode === 'add' ? 'Add New Technology' : 'Edit Technology'}
-            </h2>
+    <AdminLayout>
+      <div className="max-w-7xl mx-auto pb-12">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
             <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              onClick={() => navigate(ADMIN_ROUTES.TECH_STACK)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <HiX className="w-6 h-6 text-white" />
+              <HiArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
             </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {isEditMode ? 'Edit Technology' : 'Add New Technology'}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                {isEditMode ? 'Update technology information' : 'Add a new technology to your stack'}
+              </p>
+            </div>
           </div>
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <HiSave className="w-5 h-5" />
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
 
-          {/* Tabs */}
+        {/* Tabs */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
           <div className="border-b border-gray-200 dark:border-gray-700">
             <div className="flex gap-4 px-6">
               <button
@@ -308,250 +350,239 @@ const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Basic Information Tab */}
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="p-6">
+            {/* Basic Info Tab */}
             {activeTab === 'basic' && (
               <div className="space-y-6">
-            {/* Basic Information */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Technology Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                  placeholder="e.g., React"
-                />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Category *
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                >
-                  <option value="Frontend">Frontend</option>
-                  <option value="Backend">Backend</option>
-                  <option value="Database">Database</option>
-                  <option value="Framework">Framework</option>
-                  <option value="Tools">Tools</option>
-                </select>
-              </div>
-
-              {/* Year */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Year *
-                </label>
-                <input
-                  type="text"
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                  placeholder="e.g., 2013"
-                />
-              </div>
-
-              {/* Difficulty */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Difficulty *
-                </label>
-                <select
-                  name="difficulty"
-                  value={formData.difficulty}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                >
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Paradigm */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Paradigm *
-              </label>
-              <input
-                type="text"
-                name="paradigm"
-                value={formData.paradigm}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                placeholder="e.g., Component-based, Event-driven"
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Description *
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows={3}
-                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none resize-none"
-                placeholder="Brief description of the technology..."
-              />
-            </div>
-
-            {/* Features */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Key Features
-              </label>
-              {formData.features.map((feature, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={feature}
-                    onChange={(e) => handleArrayChange('features', index, e.target.value)}
-                    className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                    placeholder="e.g., Virtual DOM"
-                  />
-                  {formData.features.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeArrayItem('features', index)}
-                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                {/* Name and Category */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Technology Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                      placeholder="e.g., React"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Category *
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => handleInputChange('category', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                      required
                     >
-                      <HiX className="w-5 h-5" />
-                    </button>
-                  )}
+                      <option value="Frontend">Frontend</option>
+                      <option value="Backend">Backend</option>
+                      <option value="Database">Database</option>
+                      <option value="Framework">Framework</option>
+                      <option value="Tools">Tools</option>
+                    </select>
+                  </div>
                 </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => addArrayItem('features')}
-                className="text-sm text-purple-600 dark:text-purple-400 hover:underline"
-              >
-                + Add Feature
-              </button>
-            </div>
 
-            {/* Use Cases */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Use Cases
-              </label>
-              {formData.useCases.map((useCase, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={useCase}
-                    onChange={(e) => handleArrayChange('useCases', index, e.target.value)}
-                    className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                    placeholder="e.g., Single Page Applications"
-                  />
-                  {formData.useCases.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeArrayItem('useCases', index)}
-                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-                    >
-                      <HiX className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => addArrayItem('useCases')}
-                className="text-sm text-purple-600 dark:text-purple-400 hover:underline"
-              >
-                + Add Use Case
-              </button>
-            </div>
-
-            {/* Icon Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Icon *
-              </label>
-              <div className="grid grid-cols-6 md:grid-cols-9 gap-3">
-                {availableIcons.map((icon) => {
-                  const Icon = icon.component;
-                  return (
-                    <button
-                      key={icon.name}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, icon: icon.name })}
-                      className={`p-3 rounded-lg border-2 transition-all ${
-                        formData.icon === icon.name
-                          ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/30'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
-                      }`}
-                      title={icon.label}
-                    >
-                      <Icon className="w-6 h-6 text-gray-700 dark:text-gray-300 mx-auto" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Gradient Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Gradient *
-              </label>
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                {availableGradients.map((gradient) => (
-                  <button
-                    key={gradient.value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, gradient: gradient.value })}
-                    className={`relative h-12 rounded-lg border-2 transition-all ${
-                      formData.gradient === gradient.value
-                        ? 'border-purple-600 ring-2 ring-purple-300'
-                        : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
-                    }`}
-                    title={gradient.label}
-                  >
-                    <div className={`w-full h-full rounded-md ${gradient.preview}`}></div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Preview */}
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Preview
-              </label>
-              <div className="flex items-center gap-3">
-                <div className={`w-12 h-12 bg-gradient-to-r ${formData.gradient} rounded-lg flex items-center justify-center`}>
-                  <IconComponent className="w-7 h-7 text-white" />
-                </div>
+                {/* Description */}
                 <div>
-                  <p className="font-semibold text-gray-900 dark:text-white">{formData.name || 'Technology Name'}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{formData.category} • {formData.difficulty}</p>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none resize-none"
+                    placeholder="Brief description of the technology..."
+                    required
+                  />
                 </div>
-              </div>
-            </div>
+
+                {/* Year, Paradigm, Difficulty */}
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Year *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.year}
+                      onChange={(e) => handleInputChange('year', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                      placeholder="e.g., 2013"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Paradigm *
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.paradigm}
+                      onChange={(e) => handleInputChange('paradigm', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                      placeholder="e.g., Component-Based"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Difficulty *
+                    </label>
+                    <select
+                      value={formData.difficulty}
+                      onChange={(e) => handleInputChange('difficulty', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                      required
+                    >
+                      <option value="Beginner">Beginner</option>
+                      <option value="Intermediate">Intermediate</option>
+                      <option value="Advanced">Advanced</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Features */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Key Features *
+                  </label>
+                  {formData.features.map((feature, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={feature}
+                        onChange={(e) => handleArrayChange('features', index, e.target.value)}
+                        className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                        placeholder="e.g., Virtual DOM"
+                      />
+                      {formData.features.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeArrayItem('features', index)}
+                          className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                        >
+                          <HiX className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addArrayItem('features')}
+                    className="text-sm text-purple-600 dark:text-purple-400 hover:underline"
+                  >
+                    + Add Feature
+                  </button>
+                </div>
+
+                {/* Use Cases */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Use Cases *
+                  </label>
+                  {formData.useCases.map((useCase, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={useCase}
+                        onChange={(e) => handleArrayChange('useCases', index, e.target.value)}
+                        className="flex-1 px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                        placeholder="e.g., Single Page Applications"
+                      />
+                      {formData.useCases.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeArrayItem('useCases', index)}
+                          className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                        >
+                          <HiX className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addArrayItem('useCases')}
+                    className="text-sm text-purple-600 dark:text-purple-400 hover:underline"
+                  >
+                    + Add Use Case
+                  </button>
+                </div>
+
+                {/* Icon Selection */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Icon *
+                  </label>
+                  <div className="grid grid-cols-6 md:grid-cols-9 gap-3">
+                    {availableIcons.map((icon) => {
+                      const Icon = icon.component;
+                      return (
+                        <button
+                          key={icon.name}
+                          type="button"
+                          onClick={() => handleInputChange('icon', icon.name)}
+                          className={`p-3 rounded-lg border-2 transition-all ${
+                            formData.icon === icon.name
+                              ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/30'
+                              : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
+                          }`}
+                          title={icon.label}
+                        >
+                          <Icon className="w-6 h-6 text-gray-700 dark:text-gray-300 mx-auto" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Gradient Selection */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Gradient *
+                  </label>
+                  <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                    {availableGradients.map((gradient) => (
+                      <button
+                        key={gradient.value}
+                        type="button"
+                        onClick={() => handleInputChange('gradient', gradient.value)}
+                        className={`relative h-12 rounded-lg border-2 transition-all ${
+                          formData.gradient === gradient.value
+                            ? 'border-purple-600 ring-2 ring-purple-300'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
+                        }`}
+                        title={gradient.label}
+                      >
+                        <div className={`w-full h-full rounded-md ${gradient.preview}`}></div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    Preview
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 bg-gradient-to-r ${formData.gradient} rounded-lg flex items-center justify-center`}>
+                      <IconComponent className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">{formData.name || 'Technology Name'}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{formData.category} • {formData.difficulty}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -577,9 +608,9 @@ const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave
                     <p className="text-gray-500 dark:text-gray-400">No topics added yet. Click "Add Topic" to get started.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {formData.topics.map((topic, index) => (
-                      <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                      <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 border border-gray-200 dark:border-gray-600">
                         <div className="flex items-start justify-between mb-4">
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Topic #{topic.id}</h3>
                           <button
@@ -592,32 +623,32 @@ const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave
                         </div>
 
                         <div className="space-y-4">
-                          {/* Topic ID */}
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                              Topic ID *
-                            </label>
-                            <input
-                              type="number"
-                              value={topic.id}
-                              onChange={(e) => updateTopic(index, 'id', parseInt(e.target.value))}
-                              className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                              placeholder="e.g., 1"
-                            />
-                          </div>
-
-                          {/* Topic Title */}
-                          <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                              Title *
-                            </label>
-                            <input
-                              type="text"
-                              value={topic.title}
-                              onChange={(e) => updateTopic(index, 'title', e.target.value)}
-                              className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
-                              placeholder="e.g., Core Concepts"
-                            />
+                          {/* Topic ID and Title */}
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                Topic ID *
+                              </label>
+                              <input
+                                type="number"
+                                value={topic.id}
+                                onChange={(e) => updateTopic(index, 'id', parseInt(e.target.value))}
+                                className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                                placeholder="e.g., 1"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                Title *
+                              </label>
+                              <input
+                                type="text"
+                                value={topic.title}
+                                onChange={(e) => updateTopic(index, 'title', e.target.value)}
+                                className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                                placeholder="e.g., Core Concepts"
+                              />
+                            </div>
                           </div>
 
                           {/* Topic Description */}
@@ -653,7 +684,7 @@ const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                               Topic Content (Rich Text)
                             </label>
-                            <div className="grid md:grid-cols-2 gap-4">
+                            <div className="grid lg:grid-cols-2 gap-4">
                               {/* Editor */}
                               <div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Editor</p>
@@ -757,7 +788,7 @@ const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave
                 ) : (
                   <div className="space-y-4">
                     {formData.resources.map((resource, index) => (
-                      <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                      <div key={index} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 border border-gray-200 dark:border-gray-600">
                         <div className="flex items-start justify-between mb-4">
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Resource #{index + 1}</h3>
                           <button
@@ -822,40 +853,12 @@ const TechStackModal: React.FC<TechStackModalProps> = ({ isOpen, onClose, onSave
                 )}
               </div>
             )}
-
-            {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <HiSave className="w-5 h-5" />
-                    {mode === 'add' ? 'Add Technology' : 'Save Changes'}
-                  </>
-                )}
-              </button>
-            </div>
           </form>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 
-export default TechStackModal;
+export default AdminTechStackForm;
 

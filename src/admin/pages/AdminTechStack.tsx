@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../layouts/AdminLayout';
 import { HiPlus, HiPencil, HiTrash, HiSearch, HiViewGrid } from 'react-icons/hi';
 import { FaReact, FaNodeJs, FaAngular, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { SiTypescript, SiJavascript, SiMongodb, SiExpress, SiTailwindcss, SiBootstrap, SiRedux, SiMysql, SiPostgresql, SiGit, SiDocker, SiPostman } from 'react-icons/si';
 import { api } from '../../config/api';
-import TechStackModal, { TechFormData } from '../components/TechStackModal';
 import { getDifficultyColor } from '../../utils/utils';
+import { ADMIN_ROUTES } from '../routes';
 
 interface TechItem {
   id: string;
@@ -46,13 +47,11 @@ const iconMap: Record<string, any> = {
 };
 
 const AdminTechStack = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [techStack, setTechStack] = useState<TechItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-  const [selectedTech, setSelectedTech] = useState<TechFormData | null>(null);
   const [stats, setStats] = useState({ total: 0, frontend: 0, backend: 0, database: 0, framework: 0, tools: 0 });
 
   // Fetch tech stack data
@@ -115,44 +114,11 @@ const AdminTechStack = () => {
   };
 
   const handleAdd = () => {
-    setModalMode('add');
-    setSelectedTech(null);
-    setIsModalOpen(true);
+    navigate(ADMIN_ROUTES.TECH_STACK_ADD);
   };
 
   const handleEdit = (tech: TechItem) => {
-    setModalMode('edit');
-    setSelectedTech(tech as TechFormData);
-    setIsModalOpen(true);
-  };
-
-  const handleSave = async (data: TechFormData) => {
-    try {
-      if (modalMode === 'add') {
-        const response = await api.techStack.create(data);
-        if (response.success) {
-          await fetchTechStack();
-          await fetchStats();
-          setIsModalOpen(false);
-          alert('Technology added successfully!');
-        } else {
-          alert(response.message || 'Failed to add technology');
-        }
-      } else {
-        const response = await api.techStack.update(data.id!, data);
-        if (response.success) {
-          await fetchTechStack();
-          await fetchStats();
-          setIsModalOpen(false);
-          alert('Technology updated successfully!');
-        } else {
-          alert(response.message || 'Failed to update technology');
-        }
-      }
-    } catch (error) {
-      console.error('Error saving tech:', error);
-      alert('Error saving technology');
-    }
+    navigate(`/admin/tech-stack/edit/${tech.id}`);
   };
 
   const categories = ['All', 'Frontend', 'Backend', 'Database', 'Framework', 'Tools'];
@@ -370,15 +336,6 @@ const AdminTechStack = () => {
           </div>
         )}
       </div>
-
-      {/* Add/Edit Modal */}
-      <TechStackModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSave}
-        initialData={selectedTech}
-        mode={modalMode}
-      />
     </AdminLayout>
   );
 };

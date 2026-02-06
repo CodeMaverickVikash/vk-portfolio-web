@@ -7,7 +7,7 @@ import { ProtectedRoute } from './components';
 import { ROUTES } from './constants';
 import { AuthProvider } from './context/AuthContext';
 // Backend Admin UI
-import { AdminDashboard, AdminTechStack, AdminProfile } from './admin';
+import { AdminDashboard, AdminTechStack, AdminTechStackForm, AdminProfile } from './admin';
 
 function App() {
   const [isDarkModeEnabled, toggleDarkMode] = useDarkMode();
@@ -56,6 +56,16 @@ function App() {
             <Route path={ROUTES.ADMIN_TECH_STACK} element={
               <ProtectedRoute>
                 <AdminTechStack />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/tech-stack/add" element={
+              <ProtectedRoute>
+                <AdminTechStackForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/tech-stack/edit/:id" element={
+              <ProtectedRoute>
+                <AdminTechStackForm />
               </ProtectedRoute>
             } />
             <Route path={ROUTES.ADMIN_PROFILE} element={
