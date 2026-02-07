@@ -68,3 +68,14 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Deploy to Vercel
+
+- **Connect repo**: Create a new project on Vercel and link your Git repository.
+- **Install command**: Vercel will use `pnpm` automatically when `pnpm-lock.yaml` is present; no special setup required. Optionally set `pnpm install` as the install command in project settings.
+- **Build command**: `pnpm run build` (or `npm run build`). This project runs `tsc && vite build` and outputs into `build` (see `vite.config.ts`).
+- **Output directory**: `build`. The included `vercel.json` configures the static-build to use `build` and adds a rewrite to `index.html` for SPA routing.
+- **Env vars**: Add any runtime environment variables in the Vercel dashboard under Project Settings -> Environment Variables.
+- **Preview**: After deployment, Vercel provides preview and production URLs; confirm client-side routing works by visiting nested routes.
+
+If you want, I can also add a Vercel Git integration guide, set up deploy previews, or prepare a Git push checklist.

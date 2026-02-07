@@ -1,9 +1,7 @@
-import { useAuth } from '../../context/AuthContext';
-import { HiViewGrid, HiUser, HiEye, HiCode, HiShieldCheck } from 'react-icons/hi';
+import { HiViewGrid, HiUser, HiEye, HiCode } from 'react-icons/hi';
 import AdminLayout from '../layouts/AdminLayout';
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
 
   const stats = [
     {
